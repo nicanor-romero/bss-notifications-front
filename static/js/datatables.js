@@ -30,6 +30,7 @@ $(document).ready(function() {
             {targets: 3, searchable: false},
             {targets: 4, searchable: false},
             {targets: 5, searchable: false},
+            {targets: 6, searchable: false, className: 'dt-right'},
         ],
         language: language_es
     }

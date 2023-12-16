@@ -36,7 +36,7 @@
                         <tr>
                             <td>{{ notification['client_info']['razon_social'] }}</td>
                             <td>{{ notification['client_info']['telefono'] }}</td>
-                            <td>{{ notification['invoice_date'] }}</td>
+                            <td>{{ notification['invoice_date_humanized'] }}</td>
                             <td>$ {{ notification['invoice_total'] }}</td>
                             <td>$ {{ notification['invoice_paid_total'] }}</td>
                             <td id="{{ notification['id'] }}-status">
@@ -46,15 +46,18 @@
                                 <i class="fa-solid fa-spinner"></i>
                                 {% elif notification['status'] == 'STATUS_SENT' %}
                                 <i class="fa-regular fa-circle-check"></i>
-                                {% elif notification['status'] == 'STATUS_CANCELLED' or notification['status'] == 'STATUS_EXPIRED' %}
+                                {% elif notification['status'] == 'STATUS_DISABLED' or notification['status'] == 'STATUS_EXPIRED' %}
                                 <i class="fa-solid fa-ban"></i>
                                 {% endif %}
 
                                 {{ notification['status_humanized'] }}
                             </td>
                             <td>
-                                <button id="{{ notification['id'] }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-paper-plane me-2" style="color:#075E54"></i>Enviar</button>
-                                <button id="{{ notification['id'] }}-cancel-button" class="btn btn-outline-danger notification-cancel" style="display:none" data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-xmark me-2" style="color:#075E54"></i>Cancelar</button>
+                                {% if notification['status'] not in  ['STATUS_DISABLED', 'STATUS_EXPIRED'] %}
+                                    <button id="{{ notification['id'] }}-send-button" class="btn btn-outline-success notification-send" {% if notification['status'] == 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %} data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-paper-plane me-2"></i>Enviar</button>
+                                    <button id="{{ notification['id'] }}-cancel-button" class="btn btn-outline-danger notification-cancel" {% if notification['status'] != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %} data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-xmark me-2"></i>Cancelar</button>
+                                    <button id="{{ notification['id'] }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-ban me-2"></i>Deshabilitar</button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -65,22 +68,48 @@
                     $(".notification-send").click(function(event) {
                         var sendButtonDomId = $(this).attr('data-notification-id') + '-send-button';
                         var cancelButtonDomId = $(this).attr('data-notification-id') + '-cancel-button';
+                        var disableButtonDomId = $(this).attr('data-notification-id') + '-disable-button';
                         var statusDomId = $(this).attr('data-notification-id') + '-status';
 
                         document.getElementById(sendButtonDomId).disabled = true;
+                        document.getElementById(disableButtonDomId).disabled = true;
                         document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
                         $.post('/set-notification-status', {notification_id: $(this).attr('data-notification-id'), status: 'STATUS_PENDING_DISPATCH'}, function(data) {
                             var notyf = new Notyf({duration: 5000});
                             if (data['ok']) {
                                 notyf.success('Notificación programada correctamente');
                                 document.getElementById(sendButtonDomId).style.display = 'none';
-                                document.getElementById(cancelButtonDomId).style.display = 'block';
+                                document.getElementById(cancelButtonDomId).style.display = null;
                                 document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> Enviando...';
                             } else {
                                 notyf.error('Error al intentar enviar notificación');
+                                document.getElementById(disableButtonDomId).disabled = false;
                                 document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
                             }
                             document.getElementById(sendButtonDomId).disabled = false;
+                        });
+                        return;
+                    });
+
+                    $(".notification-disable").click(function(event) {
+                        var sendButtonDomId = $(this).attr('data-notification-id') + '-send-button';
+                        var disableButtonDomId = $(this).attr('data-notification-id') + '-disable-button';
+                        var statusDomId = $(this).attr('data-notification-id') + '-status';
+
+                        document.getElementById(disableButtonDomId).disabled = true;
+                        document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
+                        $.post('/set-notification-status', {notification_id: $(this).attr('data-notification-id'), status: 'STATUS_DISABLED'}, function(data) {
+                            var notyf = new Notyf({duration: 5000});
+                            if (data['ok']) {
+                                notyf.success('Notificación deshabilitada correctamente');
+                                document.getElementById(sendButtonDomId).style.display = 'none';
+                                document.getElementById(disableButtonDomId).style.display = 'none';
+                                document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-ban"></i> Deshabilitada';
+                            } else {
+                                notyf.error('Error al intentar deshabilitar notificación');
+                                document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
+                            }
+                            document.getElementById(disableButtonDomId).disabled = false;
                         });
                         return;
                     });
@@ -97,7 +126,7 @@
                             if (data['ok']) {
                                 notyf.success('Notificación cancelada correctamente');
                                 document.getElementById(cancelButtonDomId).style.display = 'none';
-                                document.getElementById(sendButtonDomId).style.display = 'block';
+                                document.getElementById(sendButtonDomId).style.display = null;
                                 document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
                             } else {
                                 notyf.error('Error al intentar cancelar notificación');

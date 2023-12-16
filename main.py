@@ -14,14 +14,14 @@ local_tz = pytz.timezone('America/Argentina/Cordoba')
 STATUS_PENDING_APPROVAL = 'STATUS_PENDING_APPROVAL'
 STATUS_PENDING_DISPATCH = 'STATUS_PENDING_DISPATCH'
 STATUS_SENT = 'STATUS_SENT'
-STATUS_CANCELLED = 'STATUS_CANCELLED'
+STATUS_DISABLED = 'STATUS_DISABLED'
 STATUS_EXPIRED = 'STATUS_EXPIRED'
 
 statuses = [
     STATUS_PENDING_APPROVAL,
     STATUS_PENDING_DISPATCH,
     STATUS_SENT,
-    STATUS_CANCELLED,
+    STATUS_DISABLED,
     STATUS_EXPIRED
 ]
 
@@ -54,12 +54,13 @@ def humanize_notifications(notifications):
         STATUS_PENDING_APPROVAL: 'Pendiente',
         STATUS_PENDING_DISPATCH: 'Enviando...',
         STATUS_SENT: 'Enviada',
-        STATUS_CANCELLED: 'Cancelada',
+        STATUS_DISABLED: 'Deshabilitada',
         STATUS_EXPIRED: 'Expirada',
     }
     for n in notifications:
         n['status_humanized'] = status_to_human.get(n.get('status'))
         n['status_icon'] = status_to_human.get(n.get('status'))
+        n['invoice_date_humanized'] = n.get('invoice_date').strftime('%d/%m/%Y')
     return notifications
 
 
