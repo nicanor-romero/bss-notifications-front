@@ -104,6 +104,26 @@ class DatabaseManager:
             return
         return list(notifications) if notifications else []
 
+    def set_db_invoice_expiration_notification_status(self, invoice_expiration_notification_id, status):
+        # Get status first
+        try:
+            current_status = self.db.invoice_expiration_notifications.find_one({'_id': invoice_expiration_notification_id}, {'status': 1}).get('status')
+        except Exception as e:
+            log.error('Got error when trying to get invoice_expiration_notification {} from database: {}'.format(invoice_expiration_notification_id, e))
+            return False
+
+        # If status is already sent, we cannot change its status
+        if current_status == 'STATUS_SENT':
+            log.warning('Notification {} already sent, not updating'.format(invoice_expiration_notification_id))
+            return False
+
+        try:
+            self.db.invoice_expiration_notifications.update_one({'_id': invoice_expiration_notification_id}, {'$set': {'status': status}})
+        except Exception as e:
+            log.error('Got error when trying to update invoice_expiration_notification {} status in database: {}'.format(invoice_expiration_notification_id, e))
+            return False
+        return True
+
 
 log = logging.getLogger()
 

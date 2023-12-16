@@ -21900,22 +21900,13 @@ article .h1, article .h2, article .h3, article .h4, article .h5, article .h6, ar
 .datepicker-dropdown {
     z-index: 9999;
 }
-.twitter-button {
-    width: 250px;
-    height: 40px;
-    line-height: 40px;
-    background-color: #1da1f2;
-    border: none;
-    border-radius: 4px;
-    color: #fff;
-    text-align: left;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: Helvetica, Arial, sans-serif;
+
+.notification-send a {
+    cursor: ne-resize;
 }
-.twitter-button:hover {
-    cursor: pointer;
-    color: #fff;
+
+.notification-send-disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
 }

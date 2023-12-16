@@ -11,6 +11,19 @@ from functools import wraps
 app = flask.Flask(__name__)
 local_tz = pytz.timezone('America/Argentina/Cordoba')
 
+STATUS_PENDING_APPROVAL = 'STATUS_PENDING_APPROVAL'
+STATUS_PENDING_DISPATCH = 'STATUS_PENDING_DISPATCH'
+STATUS_SENT = 'STATUS_SENT'
+STATUS_CANCELLED = 'STATUS_CANCELLED'
+STATUS_EXPIRED = 'STATUS_EXPIRED'
+
+statuses = [
+    STATUS_PENDING_APPROVAL,
+    STATUS_PENDING_DISPATCH,
+    STATUS_SENT,
+    STATUS_CANCELLED,
+    STATUS_EXPIRED
+]
 
 # check_if_logged_in returns True/False and a render_template call in case the user is not logged in
 def check_if_logged_in(func):
@@ -29,10 +42,25 @@ def global_variables():
 @app.route('/', methods=["GET"])
 @check_if_logged_in
 def home():
-    from_date = datetime.datetime.now().date() - datetime.timedelta(days=20)
-    to_date = datetime.datetime.now().date() - datetime.timedelta(days=19)
+    from_date = datetime.datetime.now() - datetime.timedelta(days=20)
+    to_date = datetime.datetime.now() - datetime.timedelta(days=19)
     notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
+    notifications = humanize_notifications(notifications)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
+
+
+def humanize_notifications(notifications):
+    status_to_human = {
+        STATUS_PENDING_APPROVAL: 'Pendiente',
+        STATUS_PENDING_DISPATCH: 'Enviando...',
+        STATUS_SENT: 'Enviada',
+        STATUS_CANCELLED: 'Cancelada',
+        STATUS_EXPIRED: 'Expirada',
+    }
+    for n in notifications:
+        n['status_humanized'] = status_to_human.get(n.get('status'))
+        n['status_icon'] = status_to_human.get(n.get('status'))
+    return notifications
 
 
 # Other
@@ -63,6 +91,21 @@ def logout():
     flask.session.pop('username', None)
     flask.session.pop('user_name', None)
     return flask.redirect(flask.url_for("home"))
+
+
+@app.route('/set-notification-status', methods=["POST"])
+@check_if_logged_in
+def set_notification_status_approved():
+    notification_id = flask.request.form.get('notification_id')
+    if notification_id is None:
+        return {'ok': False}
+
+    status = flask.request.form.get('status')
+    if notification_id is None or status not in statuses:
+        return {'ok': False}
+
+    ok = db_manager.set_db_invoice_expiration_notification_status(notification_id, status)
+    return {'ok': ok}
 
 
 @app.errorhandler(404)
