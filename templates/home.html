@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} | Inicio {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+  <link rel="stylesheet" type="text/css" href="static/vendor/datatables/css/datatables.min.css"/>
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+        <div class="d-block mb-4 mb-md-0">
+          <h2 class="h4">Notificaciones</h2>
+          <p class="mb-0">Estas son las notificaciones para el día de hoy</p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="row-border hover" id="notificationsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Razón Social</th>
+                            <th>Teléfono</th>
+                            <th>Fecha de factura</th>
+                            <th>Monto total a pagar</th>
+                            <th>Monto pagado</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notification in notifications %}
+                        <tr>
+                            <td>{{ notification['client_info']['razon_social'] }}</td>
+                            <td>{{ notification['client_info']['telefono'] }}</td>
+                            <td>{{ notification['invoice_date'] }}</td>
+                            <td>$ {{ notification['invoice_total'] }}</td>
+                            <td>$ {{ notification['invoice_paid_total'] }}</td>
+                            <td>$ {{ notification['status'] }}</td>
+                            <td>
+                                <a class="dropdown-item rounded-top" href="#"><i class="fa-solid fa-paper-plane" style="color:#075E54"></i>  Enviar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body text-end">
+            <button type="submit" name="login" class="btn btn-secondary"><i class="fa-solid fa-paper-plane mx-1" style="color:#f2f4f6"></i>    Enviar Todos</button>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascript %}
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+  <script src="static/js/datatables.js"></script>
+{% endblock javascript %}

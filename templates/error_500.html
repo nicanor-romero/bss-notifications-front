@@ -1,0 +1,36 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} | Error 500 {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        <section class="vh-100 d-flex align-items-center justify-content-center">
+            <div class="container">
+              <div class="row">
+                <div class="text-center text-md-center mb-4 mt-md-0">
+                  <h1 class="mb-0 h6">
+                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-5" style="heigh: 3rem;" src="/static/img/PublifyHNeg_2.svg" alt="publify">
+                  </h1>
+              </div>
+              </div>
+                <div class="row">
+                    <div class="col-12 text-center d-flex align-items-center justify-content-center">
+                        <div>
+                            <img class="img-fluid" src="/static/img/500.svg" alt="404 not found">
+                            <p class="lead my-4"></p>
+                            <a class="btn btn-primary mt-5" role="button" href="/">Volver</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascript %}{% endblock javascript %}

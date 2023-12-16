@@ -1,0 +1,36 @@
+        <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+            <a class="navbar-brand me-lg-5" href="/">
+                <img class="navbar-brand-dark" src="/static/img/logo.svg" alt="publify logo" />
+            </a>
+            <div class="d-flex align-items-center">
+                <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+
+        <nav id="sidebarMenu" class="sidebar d-lg-block bg-primary text-white collapse" data-simplebar>
+          <div class="sidebar-inner px-4 pt-3">
+
+            <!-- Sidebar - Brand -->
+            <div class="pt-3 ps-2 pe-6">
+              <a href="/">
+                <img src="/static/img/logo2.svg" alt="publify">
+              </a>
+            </div>
+
+            <ul class="nav flex-column pt-4">
+              <li class="nav-item {% if request.path == '/' %} active {% endif %}">
+                <a href="/" class="nav-link">
+                  <span class="sidebar-icon">
+                    <i class="fas fa-home"></i>
+                  </span>
+                  <span class="sidebar-text">Inicio</span>
+                </a>
+              </li>
+
+              <li role="separator" class="dropdown-divider mt-4 mb-3 border-gray-700"></li>
+
+            </ul>
+          </div>
+        </nav>

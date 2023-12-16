@@ -1,0 +1,119 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} | Iniciar Sesión {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        <section class="vh-lg-100 mt-5 mt-lg-0 bg-soft d-flex align-items-center">
+            <div class="container">
+<!--                <div class="row justify-content-center form-bg-image" data-background-lg="/static/img/signin_background.svg">-->
+                <div class="row justify-content-center form-bg-image">
+                    <div class="col-12 d-flex align-items-center justify-content-center">
+                        <div class="bg-white shadow border-0 rounded border-light p-4">
+                            <div class="text-center text-md-center mt-md-0">
+                                <h1 class="mb-0 h3">
+                                    <img class="img-fluid mx-4 px-6 mt-3 mb-4" style="width: 20rem;" src="/static/img/logo.svg" alt="publify">
+                                </h1>
+                            </div>
+                            <div class="text-center text-md-center mt-3 mb-3">
+                              <h6 class="mb-0 h6">
+<!--                                <img class="img-fluid px-5" style="height: 1.7rem; filter: grayscale(100%); opacity: 0.6;" src="/static/img/{{tenant_logo_image}}" alt="publify">-->
+                              </h6>
+                            </div>
+                            <form id="login-form" method="POST" action="" class="mt-5">
+                                <!-- Form -->
+                                <div class="form-group mb-4">
+                                    <label for="email">Email</label>
+                                    <div class="input-group">
+                                      <span class="input-group-text">
+                                        <span class="fas fa-envelope"></span>
+                                      </span>
+                                      <input id="username-input" type="email" class="form-control rounded-end" placeholder="example@company.com" name="username" autocomplete="username email" autofocus required>
+                                      <div class="invalid-feedback">Email incorrecto</div>
+                                    </div>
+                                </div>
+                                <!-- End of Form -->
+                                <div class="form-group">
+                                    <!-- Form -->
+                                    <div class="form-group mb-4">
+                                        <label for="password">Contraseña</label>
+                                        <div class="input-group">
+                                          <span class="input-group-text" id="password-input-icon">
+                                            <span class="fas fa-unlock-alt"></span>
+                                          </span>
+                                          <input id="password-input" type="password" placeholder="Contraseña" class="form-control" name="password" autocomplete="new-password" required>
+                                          <span class="input-group-text rounded-end" id="show-password-toggle">
+                                            <a><i id="show-password-icon" class="fa fa-eye"></i></a>
+                                          </span>
+                                          <div class="invalid-feedback">Contraseña incorrecta</div>
+                                          <script>
+                                            $(document).ready(function() {
+                                              $(document).on('click', "#show-password-toggle", function(e) {
+                                                const new_type = $('#password-input').attr("type") === "password" ? "text" : "password";
+                                                $('#password-input').attr("type", new_type);
+                                                $('#show-password-icon').toggleClass("fa-eye-slash");
+                                              });
+                                            });
+                                          </script>
+                                        </div>
+                                    </div>
+                                    <!-- End of Form -->
+                                </div>
+                                <div class="d-grid mt-5 mb-3">
+                                    <button type="submit" name="login" class="btn btn-secondary">Iniciar Sesión</button>
+                                </div>
+                                <script>
+                                    $(document).ready(function() {
+                                          $(document).on('submit', "#login-form", function(e) {
+                                              $("#username-input").removeClass("is-invalid");
+                                              $("#password-input").removeClass("is-invalid");
+                                              $.post('/check-login', {username: $("#username-input").val(), password: $("#password-input").val()}, function(data) {
+                                                  var notyf = new Notyf({duration: 3000});
+                                                  if (data['ok']) {
+                                                      notyf.success('Iniciando sesión...');
+                                                      window.location.href = "/";
+                                                  } else {
+                                                      if (data['reason'] == 'wrong_username') {
+                                                        $("#username-input").addClass("is-invalid");
+                                                      } else if (data['reason'] == 'wrong_password') {
+                                                        $("#password-input").addClass("is-invalid");
+                                                      } else {
+                                                        notyf.error('Error al intentar iniciar sesión');
+                                                      }
+                                                  }
+                                              });
+                                              return false;
+                                        });
+                                    });
+                                </script>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mt-5">
+                    <div class="col-2 d-flex align-items-center justify-content-center">
+                        <a href="https://publifyapp.com/terms" style="color:grey;font-size:80%">Condiciones del servicio</a>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-center">
+                        <a href="https://publifyapp.com/privacy" style="color:grey;font-size:80%">Política de privacidad</a>
+                    </div>
+                </div>
+
+              </div>
+        </section>
+    </main>
+
+<!--    <footer>-->
+<!--        <a href="https://publifyapp.com/terms">Condiciones del servicio</a>-->
+<!--        <a href="https://publifyapp.com/privacy">Política de privacidad</a>-->
+<!--    </footer>-->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascript %}{% endblock javascript %}

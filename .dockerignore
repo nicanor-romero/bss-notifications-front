@@ -1,0 +1,14 @@
+Dockerfile
+README.md
+app.yaml
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
+.git
+.gitignore
+.DS_Store
+static/.DS_Store
+deploy_*.sh
+.idea/
