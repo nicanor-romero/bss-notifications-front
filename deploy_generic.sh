@@ -1,10 +1,10 @@
 #!/bin/sh
 
 gcloud_account=mediainnovationhub@gmail.com
-gcloud_project=la-voz-social-media-publisher
-image_tag=us.gcr.io/${gcloud_project}/fetcher-publisher-front-${tenant}
+gcloud_project=notifynow-app-405611
+image_tag=us.gcr.io/${gcloud_project}/notifynow-app-front-${tenant}
 git_hash=$(git rev-parse --short HEAD)
-cloud_run_service_name=fetcher-publisher-front-${tenant}
+cloud_run_service_name=notifynow-app-front-${tenant}
 
 export DOCKER_BUILDKIT=0
 export COMPOSE_DOCKER_CLI_BUILD=0

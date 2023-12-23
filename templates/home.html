@@ -39,100 +39,117 @@
                             <td>{{ notification['invoice_date_humanized'] }}</td>
                             <td>$ {{ notification['invoice_total'] }}</td>
                             <td>$ {{ notification['invoice_paid_total'] }}</td>
-                            <td id="{{ notification['id'] }}-status">
-                                {% if notification['status'] == 'STATUS_PENDING_APPROVAL' %}
-                                <i class="fa-regular fa-clock"></i>
-                                {% elif notification['status'] == 'STATUS_PENDING_DISPATCH' %}
-                                <i class="fa-solid fa-spinner"></i>
-                                {% elif notification['status'] == 'STATUS_SENT' %}
-                                <i class="fa-regular fa-circle-check"></i>
-                                {% elif notification['status'] == 'STATUS_DISABLED' or notification['status'] == 'STATUS_EXPIRED' %}
-                                <i class="fa-solid fa-ban"></i>
-                                {% endif %}
 
-                                {{ notification['status_humanized'] }}
+                            <td>
+                                <i id="{{ notification['id'] }}-status-pending-approval" class="fa-regular fa-clock" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification['id'] }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification['status'] != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification['id'] }}-status-sent" class="fa-regular fa-circle-check" {% if notification['status'] != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification['id'] }}-status-disabled" class="fa-solid fa-ban" {% if notification['status'] != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
+                                <span id="{{ notification['id'] }}-status">{{ notification['status_humanized'] }}</span>
                             </td>
                             <td>
-                                {% if notification['status'] not in  ['STATUS_DISABLED', 'STATUS_EXPIRED'] %}
-                                    <button id="{{ notification['id'] }}-send-button" class="btn btn-outline-success notification-send" {% if notification['status'] == 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %} data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-paper-plane me-2"></i>Enviar</button>
-                                    <button id="{{ notification['id'] }}-cancel-button" class="btn btn-outline-danger notification-cancel" {% if notification['status'] != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %} data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-xmark me-2"></i>Cancelar</button>
-                                    <button id="{{ notification['id'] }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification['id'] }}"><i class="fa-solid fa-ban me-2"></i>Deshabilitar</button>
-                                {% endif %}
+                                <button id="{{ notification['id'] }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification['id'] }}" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                    <i class="fa-solid fa-paper-plane me-2"></i>Enviar</button>
+                                <button id="{{ notification['id'] }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification['id'] }}" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                    <i class="fa-solid fa-ban me-2"></i>Deshabilitar</button>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
 
-                <script>
-                    $(".notification-send").click(function(event) {
-                        var sendButtonDomId = $(this).attr('data-notification-id') + '-send-button';
-                        var cancelButtonDomId = $(this).attr('data-notification-id') + '-cancel-button';
-                        var disableButtonDomId = $(this).attr('data-notification-id') + '-disable-button';
-                        var statusDomId = $(this).attr('data-notification-id') + '-status';
 
-                        document.getElementById(sendButtonDomId).disabled = true;
-                        document.getElementById(disableButtonDomId).disabled = true;
-                        document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
-                        $.post('/set-notification-status', {notification_id: $(this).attr('data-notification-id'), status: 'STATUS_PENDING_DISPATCH'}, function(data) {
+
+                <script>
+                    function update_notification_status(notification_id, notification_status, notification_status_humanized) {
+                        var status_pending_approval = notification_id + '-status-pending-approval';
+                        var status_pending_dispatch = notification_id + '-status-pending-dispatch';
+                        var status_sent = notification_id + '-status-sent';
+                        var status_disabled = notification_id + '-status-disabled';
+
+                        var button_send = notification_id + '-send-button';
+                        var button_disable = notification_id + '-disable-button';
+
+                        // Hide all first
+                        document.getElementById(status_pending_approval).style.display = 'none';
+                        document.getElementById(status_pending_dispatch).style.display = 'none';
+                        document.getElementById(status_sent).style.display = 'none';
+                        document.getElementById(status_disabled).style.display = 'none';
+
+                        document.getElementById(button_send).style.display = 'none';
+                        document.getElementById(button_disable).style.display = 'none';
+
+                        // Set status humanized
+                        var status_dom_id = notification_id + '-status';
+                        document.getElementById(status_dom_id).innerHTML = notification_status_humanized;
+
+                        console.log('notification_status:', notification_status);
+                        console.log('notification_status_humanized:', notification_status_humanized);
+
+                        if (notification_status == 'STATUS_PENDING_APPROVAL') {
+                            document.getElementById(status_pending_approval).style.display = null;
+                            document.getElementById(button_send).style.display = null;
+                            document.getElementById(button_disable).style.display = null;
+                        } else if (notification_status == 'STATUS_PENDING_DISPATCH') {
+                            document.getElementById(status_pending_dispatch).style.display = null;
+                        } else if (notification_status == 'STATUS_SENT') {
+                            document.getElementById(status_sent).style.display = null;
+                        } else if (notification_status == 'STATUS_DISABLED') {
+                            document.getElementById(status_disabled).style.display = null;
+                        }
+                        return
+                    };
+
+                    $(".notification-send").click(function(event) {
+                        var notification_id = $(this).attr('data-notification-id')
+                        var status_dom_id = notification_id + '-status';
+                        var send_button_dom_id = notification_id + '-send-button';
+                        var disable_button_dom_id = notification_id + '-disable-button';
+
+                        document.getElementById(send_button_dom_id).disabled = true;
+                        document.getElementById(disable_button_dom_id).disabled = true;
+
+                        var previous_status_html = document.getElementById(status_dom_id).innerHTML;
+                        document.getElementById(status_dom_id).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
+
+                        $.post('/set-notification-status', {notification_id: notification_id, status: 'STATUS_PENDING_DISPATCH'}, function(data) {
                             var notyf = new Notyf({duration: 5000});
                             if (data['ok']) {
                                 notyf.success('Notificación programada correctamente');
-                                document.getElementById(sendButtonDomId).style.display = 'none';
-                                document.getElementById(cancelButtonDomId).style.display = null;
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> Enviando...';
+                                update_notification_status(notification_id, data['status'], data['status_humanized']);
                             } else {
                                 notyf.error('Error al intentar enviar notificación');
-                                document.getElementById(disableButtonDomId).disabled = false;
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
+                                document.getElementById(status_dom_id).innerHTML = previous_status_html;
                             }
-                            document.getElementById(sendButtonDomId).disabled = false;
+                            document.getElementById(send_button_dom_id).disabled = false;
+                            document.getElementById(disable_button_dom_id).disabled = false;
                         });
                         return;
                     });
 
                     $(".notification-disable").click(function(event) {
-                        var sendButtonDomId = $(this).attr('data-notification-id') + '-send-button';
-                        var disableButtonDomId = $(this).attr('data-notification-id') + '-disable-button';
-                        var statusDomId = $(this).attr('data-notification-id') + '-status';
+                        var notification_id = $(this).attr('data-notification-id')
+                        var status_dom_id = notification_id + '-status';
+                        var send_button_dom_id = notification_id + '-send-button';
+                        var disable_button_dom_id = notification_id + '-disable-button';
 
-                        document.getElementById(disableButtonDomId).disabled = true;
-                        document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
-                        $.post('/set-notification-status', {notification_id: $(this).attr('data-notification-id'), status: 'STATUS_DISABLED'}, function(data) {
+                        document.getElementById(send_button_dom_id).disabled = true;
+                        document.getElementById(disable_button_dom_id).disabled = true;
+
+                        var previous_status_html = document.getElementById(status_dom_id).innerHTML;
+                        document.getElementById(status_dom_id).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
+
+                        $.post('/set-notification-status', {notification_id: notification_id, status: 'STATUS_DISABLED'}, function(data) {
                             var notyf = new Notyf({duration: 5000});
                             if (data['ok']) {
                                 notyf.success('Notificación deshabilitada correctamente');
-                                document.getElementById(sendButtonDomId).style.display = 'none';
-                                document.getElementById(disableButtonDomId).style.display = 'none';
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-ban"></i> Deshabilitada';
+                                update_notification_status(notification_id, data['status'], data['status_humanized']);
                             } else {
                                 notyf.error('Error al intentar deshabilitar notificación');
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
+                                document.getElementById(status_dom_id).innerHTML = previous_status_html;
                             }
-                            document.getElementById(disableButtonDomId).disabled = false;
-                        });
-                        return;
-                    });
-
-                    $(".notification-cancel").click(function(event) {
-                        var sendButtonDomId = $(this).attr('data-notification-id') + '-send-button';
-                        var cancelButtonDomId = $(this).attr('data-notification-id') + '-cancel-button';
-                        var statusDomId = $(this).attr('data-notification-id') + '-status';
-
-                        document.getElementById(cancelButtonDomId).disabled = true;
-                        document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> Cancelando...';
-                        $.post('/set-notification-status', {notification_id: $(this).attr('data-notification-id'), status: 'STATUS_PENDING_APPROVAL'}, function(data) {
-                            var notyf = new Notyf({duration: 5000});
-                            if (data['ok']) {
-                                notyf.success('Notificación cancelada correctamente');
-                                document.getElementById(cancelButtonDomId).style.display = 'none';
-                                document.getElementById(sendButtonDomId).style.display = null;
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-regular fa-clock"></i> Pendiente';
-                            } else {
-                                notyf.error('Error al intentar cancelar notificación');
-                                document.getElementById(statusDomId).innerHTML = '<i class="fa-solid fa-spinner"></i> Enviando...';
-                            }
-                            document.getElementById(cancelButtonDomId).disabled = false;
+                            document.getElementById(send_button_dom_id).disabled = false;
+                            document.getElementById(disable_button_dom_id).disabled = false;
                         });
                         return;
                     });

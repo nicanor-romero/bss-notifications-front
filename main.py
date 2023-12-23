@@ -17,13 +17,13 @@ STATUS_SENT = 'STATUS_SENT'
 STATUS_DISABLED = 'STATUS_DISABLED'
 STATUS_EXPIRED = 'STATUS_EXPIRED'
 
-statuses = [
-    STATUS_PENDING_APPROVAL,
-    STATUS_PENDING_DISPATCH,
-    STATUS_SENT,
-    STATUS_DISABLED,
-    STATUS_EXPIRED
-]
+status_to_human = {
+    STATUS_PENDING_APPROVAL: 'Pendiente',
+    STATUS_PENDING_DISPATCH: 'Enviando...',
+    STATUS_SENT: 'Enviada',
+    STATUS_DISABLED: 'Deshabilitada',
+    STATUS_EXPIRED: 'Expirada',
+}
 
 # check_if_logged_in returns True/False and a render_template call in case the user is not logged in
 def check_if_logged_in(func):
@@ -43,23 +43,17 @@ def global_variables():
 @check_if_logged_in
 def home():
     from_date = datetime.datetime.now() - datetime.timedelta(days=20)
+    from_date_day = datetime.datetime.combine(from_date, datetime.datetime.min.time())
     to_date = datetime.datetime.now() - datetime.timedelta(days=19)
-    notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
+    to_date_day = datetime.datetime.combine(to_date, datetime.datetime.min.time())
+    notifications = db_manager.get_db_invoice_expiration_notifications(from_date_day, to_date_day)
     notifications = humanize_notifications(notifications)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
 
 
 def humanize_notifications(notifications):
-    status_to_human = {
-        STATUS_PENDING_APPROVAL: 'Pendiente',
-        STATUS_PENDING_DISPATCH: 'Enviando...',
-        STATUS_SENT: 'Enviada',
-        STATUS_DISABLED: 'Deshabilitada',
-        STATUS_EXPIRED: 'Expirada',
-    }
     for n in notifications:
         n['status_humanized'] = status_to_human.get(n.get('status'))
-        n['status_icon'] = status_to_human.get(n.get('status'))
         n['invoice_date_humanized'] = n.get('invoice_date').strftime('%d/%m/%Y')
     return notifications
 
@@ -96,17 +90,17 @@ def logout():
 
 @app.route('/set-notification-status', methods=["POST"])
 @check_if_logged_in
-def set_notification_status_approved():
+def set_notification_status():
     notification_id = flask.request.form.get('notification_id')
-    if notification_id is None:
+    if not notification_id:
         return {'ok': False}
 
     status = flask.request.form.get('status')
-    if notification_id is None or status not in statuses:
+    if notification_id is None or status not in status_to_human:
         return {'ok': False}
 
     ok = db_manager.set_db_invoice_expiration_notification_status(notification_id, status)
-    return {'ok': ok}
+    return {'ok': ok, 'status': status, 'status_humanized': status_to_human.get(status)}
 
 
 @app.errorhandler(404)
@@ -138,11 +132,11 @@ db_secrets = {
     'password': os.environ.get('DB_PASSWORD'),
     'fernet_key': os.environ.get('DB_SECRETS_KEY')
 }
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', '1234567890')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 app.register_error_handler(404, page_not_found)
 app.register_error_handler(500, internal_server_error)
 
-db_manager = m_db_manager.DatabaseManager(db_secrets)
 
+db_manager = m_db_manager.DatabaseManager(db_secrets)
 if __name__ == "__main__":
     app.run(debug=True, host="localhost", port=int(os.environ.get("PORT", 8080)), ssl_context='adhoc')
