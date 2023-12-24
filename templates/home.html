@@ -34,23 +34,23 @@
                     <tbody>
                         {% for notification in notifications %}
                         <tr>
-                            <td>{{ notification['client_info']['razon_social'] }}</td>
-                            <td>{{ notification['client_info']['telefono'] }}</td>
-                            <td>{{ notification['invoice_date_humanized'] }}</td>
-                            <td>$ {{ notification['invoice_total'] }}</td>
-                            <td>$ {{ notification['invoice_paid_total'] }}</td>
+                            <td>{{ notification.client_info.name }}</td>
+                            <td>{{ notification.client_info.phone }}</td>
+                            <td>{{ notification.invoices[0].invoice_datetime_humanized }}</td>
+                            <td>$ {{ notification.invoice_total }}</td>
+                            <td>$ {{ notification.invoice_paid_total }}</td>
 
                             <td>
-                                <i id="{{ notification['id'] }}-status-pending-approval" class="fa-regular fa-clock" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification['id'] }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification['status'] != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification['id'] }}-status-sent" class="fa-regular fa-circle-check" {% if notification['status'] != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification['id'] }}-status-disabled" class="fa-solid fa-ban" {% if notification['status'] != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
-                                <span id="{{ notification['id'] }}-status">{{ notification['status_humanized'] }}</span>
+                                <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
+                                <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
                             </td>
                             <td>
-                                <button id="{{ notification['id'] }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification['id'] }}" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                <button id="{{ notification.id }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
                                     <i class="fa-solid fa-paper-plane me-2"></i>Enviar</button>
-                                <button id="{{ notification['id'] }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification['id'] }}" {% if notification['status'] != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                <button id="{{ notification.id }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
                                     <i class="fa-solid fa-ban me-2"></i>Deshabilitar</button>
                             </td>
                         </tr>

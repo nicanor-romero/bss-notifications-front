@@ -7,6 +7,7 @@ import logging
 import commons
 import certifi
 import cryptography.fernet as fernet
+import notifications as m_notifications
 
 
 class DatabaseManager:
@@ -87,12 +88,12 @@ class DatabaseManager:
                 {
                     '$and': [
                         {
-                            'invoice_date': {
-                                '$gte': from_date
+                            'from_date': {
+                                '$eq': from_date
                             }
                         }, {
-                            'invoice_date': {
-                                '$lte': to_date
+                            'to_date': {
+                                '$eq': to_date
                             }
                         },
                     ]
@@ -102,7 +103,7 @@ class DatabaseManager:
         except Exception as e:
             log.error('Got error when trying to get invoice_expiration_notifications from {} to {} from database: {}'.format(from_date, to_date, e))
             return
-        return list(notifications) if notifications else []
+        return [m_notifications.InvoiceExpirationNotification.from_db(n) for n in notifications] if notifications else []
 
     def set_db_invoice_expiration_notification_status(self, invoice_expiration_notification_id, status):
         # Get status first

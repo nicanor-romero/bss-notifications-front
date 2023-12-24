@@ -42,19 +42,19 @@ def global_variables():
 @app.route('/', methods=["GET"])
 @check_if_logged_in
 def home():
-    from_date = datetime.datetime.now() - datetime.timedelta(days=20)
-    from_date_day = datetime.datetime.combine(from_date, datetime.datetime.min.time())
-    to_date = datetime.datetime.now() - datetime.timedelta(days=19)
-    to_date_day = datetime.datetime.combine(to_date, datetime.datetime.min.time())
-    notifications = db_manager.get_db_invoice_expiration_notifications(from_date_day, to_date_day)
+    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=20), datetime.datetime.min.time())
+    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=19), datetime.datetime.min.time())
+    notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
     notifications = humanize_notifications(notifications)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
 
 
 def humanize_notifications(notifications):
     for n in notifications:
-        n['status_humanized'] = status_to_human.get(n.get('status'))
-        n['invoice_date_humanized'] = n.get('invoice_date').strftime('%d/%m/%Y')
+        n.status_humanized = status_to_human.get(n.status)
+        for inv in n.invoices:
+            inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
+            inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
     return notifications
 
 
