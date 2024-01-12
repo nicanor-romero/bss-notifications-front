@@ -39,8 +39,8 @@
                             <td>{{ notification.client_info.name }}</td>
                             <td>{{ notification.client_info.phone }}</td>
                             <td>{{ notification.invoices[0].invoice_datetime_humanized }}</td>
-                            <td>$ {{ notification.invoice_total }}</td>
-                            <td>$ {{ notification.invoice_paid_total }}</td>
+                            <td>$ {{ notification.invoice_total_humanized }}</td>
+                            <td>$ {{ notification.invoice_paid_total_humanized }}</td>
 
                             <td>
                                 <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>

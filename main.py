@@ -51,18 +51,20 @@ def home():
 
 
 def humanize_notifications(notifications):
-    locale.setlocale(locale.LC_ALL, 'es_ES')
-    t = locale.localeconv()
     for n in notifications:
         n.status_humanized = status_to_human.get(n.status)
-        n.invoice_total = locale.format_string('%d', n.invoice_total, grouping=True, monetary=True)
-        n.invoice_paid_total = locale.format_string('%d', n.invoice_paid_total, grouping=True, monetary=True)
+        n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
+        n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
         for inv in n.invoices:
-            inv.total = locale.format_string('%d', inv.total, grouping=True, monetary=True)
-            inv.paid_total = locale.format_string('%d', inv.paid_total, grouping=True, monetary=True)
+            inv.total_humanized = to_spanish_number_str(inv.total)
+            inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)
             inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
             inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
     return notifications
+
+
+def to_spanish_number_str(number):
+    return "{:,}".format(number).replace(',', '_').replace('.', ',').replace('_', '.')
 
 
 # Other
