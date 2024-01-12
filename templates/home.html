@@ -22,6 +22,7 @@
                 <table class="row-border hover" id="notificationsTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>Código Cliente</th>
                             <th>Razón Social</th>
                             <th>Teléfono</th>
                             <th>Fecha de factura</th>
@@ -34,6 +35,7 @@
                     <tbody>
                         {% for notification in notifications %}
                         <tr>
+                            <td>{{ notification.client_info.id }}</td>
                             <td>{{ notification.client_info.name }}</td>
                             <td>{{ notification.client_info.phone }}</td>
                             <td>{{ notification.invoices[0].invoice_datetime_humanized }}</td>
@@ -160,8 +162,33 @@
 
     <div class="card shadow mb-4">
         <div class="card-body text-end">
-            <button type="submit" name="login" class="btn btn-secondary"><i class="fa-solid fa-paper-plane mx-1" style="color:#f2f4f6"></i>    Enviar Todos</button>
+            <button type="submit" id="notifications-send-all" class="btn btn-secondary notifications-send-all"><i class="fa-solid fa-paper-plane mx-1" style="color:#f2f4f6"></i>    Enviar Todos</button>
         </div>
+
+        <script>
+            $(".notifications-send-all").click(function(event) {
+                console.log("Sending all notifications");
+
+                var notification_id = $(this).attr('data-notification-id')
+                var send_button_dom_id = notification_id + '-send-button';
+                var disable_button_dom_id = notification_id + '-disable-button';
+
+                document.getElementById(send_button_dom_id).disabled = true;
+                document.getElementById(disable_button_dom_id).disabled = true;
+
+                $.post('/set-notification-status-all', {status: 'STATUS_PENDING_DISPATCH'}, function(data) {
+                    var notyf = new Notyf({duration: 5000});
+                    if (data['ok']) {
+                        notyf.success('Notificaciones programadas correctamente');
+                    } else {
+                        notyf.error('Error al intentar enviar notificaciones');
+                    }
+                    document.getElementById(send_button_dom_id).disabled = false;
+                    document.getElementById(disable_button_dom_id).disabled = false;
+                });
+                return;
+            });
+        </script>
     </div>
 
 {% endblock content %}

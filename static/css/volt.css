@@ -17496,7 +17496,7 @@ textarea.form-control-lg {
 }
 }@media (min-width:992px) {
     .content {
-    margin-left: 260px;
+    margin-left: 0px;
 }
 }.sidebar-toggle {
     font-size: 1.3rem;

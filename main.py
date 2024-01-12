@@ -4,6 +4,7 @@ import os
 import logging
 import commons
 import datetime
+import locale
 import db_manager as m_db_manager
 from functools import wraps
 
@@ -42,17 +43,23 @@ def global_variables():
 @app.route('/', methods=["GET"])
 @check_if_logged_in
 def home():
-    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=20), datetime.datetime.min.time())
-    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=19), datetime.datetime.min.time())
+    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=30), datetime.datetime.min.time())
+    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=0), datetime.datetime.min.time())
     notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
     notifications = humanize_notifications(notifications)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
 
 
 def humanize_notifications(notifications):
+    locale.setlocale(locale.LC_ALL, 'es_ES')
+    t = locale.localeconv()
     for n in notifications:
         n.status_humanized = status_to_human.get(n.status)
+        n.invoice_total = locale.format_string('%d', n.invoice_total, grouping=True, monetary=True)
+        n.invoice_paid_total = locale.format_string('%d', n.invoice_paid_total, grouping=True, monetary=True)
         for inv in n.invoices:
+            inv.total = locale.format_string('%d', inv.total, grouping=True, monetary=True)
+            inv.paid_total = locale.format_string('%d', inv.paid_total, grouping=True, monetary=True)
             inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
             inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
     return notifications

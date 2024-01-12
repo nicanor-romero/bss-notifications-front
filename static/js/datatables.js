@@ -22,15 +22,25 @@ $(document).ready(function() {
         searching: true,
         scrollX: false,
         pageLength: 50,
-        ordering: false,
+        ordering: true,
+        order: [[3, 'asc'], [1, 'asc']],
         columnDefs: [
-            {targets: 0, searchable: true},
+            // Código Cliente
+            {targets: 0, searchable: true, width: '5%', className: 'dt-right'},
+            // Razón Social
             {targets: 1, searchable: true},
-            {targets: 2, searchable: true},
-            {targets: 3, searchable: false},
-            {targets: 4, searchable: false},
-            {targets: 5, searchable: false},
-            {targets: 6, searchable: false, className: 'dt-right'},
+            // Teléfono
+            {targets: 2, searchable: true, width: '8%'},
+            // Fecha de factura
+            {targets: 3, searchable: true, width: '5%'},
+            // Monto total a pagar
+            {targets: 4, searchable: false, width: '8%', className: 'dt-right'},
+            // Monto pagado
+            {targets: 5, searchable: false, width: '8%', className: 'dt-right'},
+            // Estado
+            {targets: 6, searchable: false, width: '8%', className: 'dt-right'},
+            // Acciones
+            {targets: 7, searchable: false, width: '20%', className: 'dt-right'},
         ],
         language: language_es
     }

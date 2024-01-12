@@ -6,9 +6,10 @@ class InvoiceExpirationNotification:
     STATUS_DISABLED = 'STATUS_DISABLED'
     STATUS_EXPIRED = 'STATUS_EXPIRED'
 
-    def __init__(self, client_info, invoice_total, invoice_paid_total, invoices, from_date, to_date):
+    def __init__(self, client_info, account_executive, invoice_total, invoice_paid_total, invoices, from_date, to_date):
         self.id = '{}:{}:{}'.format(client_info.id, from_date.strftime('%Y%m%d'), to_date.strftime('%Y%m%d'))
         self.client_info = client_info
+        self.account_executive = account_executive
         self.invoice_total = invoice_total
         self.invoice_paid_total = invoice_paid_total
         self.from_date = from_date
@@ -23,9 +24,11 @@ class InvoiceExpirationNotification:
     @staticmethod
     def from_db(db_obj):
         client_info = ClientInfo.from_db(db_obj.get('client_info'))
+        account_executive = AccountExecutive.from_db(db_obj.get('account_executive'))
         invoices = [SaleInvoice.from_db(inv) for inv in db_obj.get('invoices')]
         obj = InvoiceExpirationNotification(
             client_info,
+            account_executive,
             db_obj.get('invoice_total'),
             db_obj.get('invoice_paid_total'),
             invoices,
@@ -36,7 +39,8 @@ class InvoiceExpirationNotification:
 
     def to_db(self):
         db_obj = self.__dict__.copy()
-        db_obj['client_info'] = self.client_info.__dict__.copy()
+        db_obj['client_info'] = self.client_info.to_db()
+        db_obj['account_executive'] = self.account_executive.to_db()
         db_obj['invoices'] = [inv.to_db() for inv in self.invoices]
         return db_obj
 
@@ -72,14 +76,36 @@ class ClientInfo:
         return db_obj
 
 
+class AccountExecutive:
+    def __init__(self, user_id, user_name, phone, email):
+        self.user_id = user_id
+        self.user_name = user_name
+        self.phone = phone
+        self.email = email
+        return
+
+    @staticmethod
+    def from_db(db_obj):
+        obj = AccountExecutive(
+            db_obj.get('user_id'),
+            db_obj.get('user_name'),
+            db_obj.get('phone'),
+            db_obj.get('email')
+        )
+        return obj
+
+    def to_db(self):
+        db_obj = self.__dict__.copy()
+        return db_obj
+
+
 class SaleInvoice:
-    def __init__(self, invoice_number, total, paid_total, invoice_datetime, invoice_expiration_datetime, cancelled):
+    def __init__(self, invoice_number, total, paid_total, invoice_datetime, invoice_expiration_datetime):
         self.invoice_number = invoice_number
         self.total = total
         self.paid_total = paid_total
         self.invoice_datetime = invoice_datetime
         self.invoice_expiration_datetime = invoice_expiration_datetime
-        self.cancelled = cancelled
         return
 
     @staticmethod
@@ -90,11 +116,9 @@ class SaleInvoice:
             db_obj.get('paid_total'),
             db_obj.get('invoice_datetime'),
             db_obj.get('invoice_expiration_datetime'),
-            db_obj.get('cancelled')
         )
         return obj
 
     def to_db(self):
         db_obj = self.__dict__.copy()
         return db_obj
-

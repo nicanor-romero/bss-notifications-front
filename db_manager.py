@@ -88,13 +88,11 @@ class DatabaseManager:
                 {
                     '$and': [
                         {
-                            'from_date': {
-                                '$eq': from_date
-                            }
+                            'from_date': {'$gte': from_date},
+                            'to_date': {'$gte': from_date}
                         }, {
-                            'to_date': {
-                                '$eq': to_date
-                            }
+                            'from_date': {'$lte': to_date},
+                            'to_date': {'$lte': to_date}
                         },
                     ]
                 },
