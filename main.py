@@ -43,8 +43,8 @@ def global_variables():
 @app.route('/', methods=["GET"])
 @check_if_logged_in
 def home():
-    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=30), datetime.datetime.min.time())
-    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=0), datetime.datetime.min.time())
+    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=20), datetime.datetime.min.time())
+    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=19), datetime.datetime.min.time())
     notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
     notifications = humanize_notifications(notifications)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
