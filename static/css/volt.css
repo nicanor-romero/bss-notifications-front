@@ -2591,6 +2591,7 @@ progress {
     border-color: #353e4b;
 }
 .table-responsive {
+    font-size: 0.9rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }

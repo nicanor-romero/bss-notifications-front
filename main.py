@@ -55,6 +55,7 @@ def humanize_notifications(notifications):
         n.status_humanized = status_to_human.get(n.status)
         n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
         n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
+        n.invoice_unpaid_total_humanized = to_spanish_number_str(n.invoice_total - n.invoice_paid_total)
         for inv in n.invoices:
             inv.total_humanized = to_spanish_number_str(inv.total)
             inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)

@@ -37,10 +37,12 @@ $(document).ready(function() {
             {targets: 4, searchable: false, width: '8%', className: 'dt-right'},
             // Monto pagado
             {targets: 5, searchable: false, width: '8%', className: 'dt-right'},
-            // Estado
+            // Saldo
             {targets: 6, searchable: false, width: '8%', className: 'dt-right'},
+            // Estado
+            {targets: 7, searchable: false, width: '8%', className: 'dt-right'},
             // Acciones
-            {targets: 7, searchable: false, width: '20%', className: 'dt-right'},
+            {targets: 8, searchable: false, width: '20%', className: 'dt-right'},
         ],
         language: language_es
     }

@@ -28,6 +28,7 @@
                             <th>Fecha de factura</th>
                             <th>Monto total a pagar</th>
                             <th>Monto pagado</th>
+                            <th>Saldo</th>
                             <th>Estado</th>
                             <th></th>
                         </tr>
@@ -41,6 +42,7 @@
                             <td>{{ notification.invoices[0].invoice_datetime_humanized }}</td>
                             <td>$ {{ notification.invoice_total_humanized }}</td>
                             <td>$ {{ notification.invoice_paid_total_humanized }}</td>
+                            <td>$ {{ notification.invoice_unpaid_total_humanized }}</td>
 
                             <td>
                                 <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
