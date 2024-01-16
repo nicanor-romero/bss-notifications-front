@@ -47,7 +47,7 @@ class InvoiceExpirationNotification:
 
 
 class ClientInfo:
-    def __init__(self, client_id, name, tin, phone, mobile_phone, email, account_manager, company):
+    def __init__(self, client_id, name, tin, phone, mobile_phone, email, account_manager, company, account_debt):
         self.id = client_id
         self.name = name
         self.tin = tin
@@ -56,6 +56,7 @@ class ClientInfo:
         self.email = None if email is None or email == "" else email
         self.account_manager = account_manager
         self.company = company
+        self.account_debt = account_debt
         return
 
     @staticmethod
@@ -68,7 +69,8 @@ class ClientInfo:
             db_obj.get('mobile_phone'),
             db_obj.get('email'),
             db_obj.get('account_manager'),
-            db_obj.get('company')
+            db_obj.get('company'),
+            db_obj.get('account_debt')
         )
         return obj
 
@@ -101,12 +103,13 @@ class AccountExecutive:
 
 
 class SaleInvoice:
-    def __init__(self, invoice_number, total, paid_total, invoice_datetime, invoice_expiration_datetime):
+    def __init__(self, invoice_number, total, paid_total, invoice_datetime, invoice_expiration_datetime, account_type):
         self.invoice_number = invoice_number
         self.total = total
         self.paid_total = paid_total
         self.invoice_datetime = invoice_datetime
         self.invoice_expiration_datetime = invoice_expiration_datetime
+        self.account_type = account_type
         return
 
     @staticmethod
@@ -117,6 +120,7 @@ class SaleInvoice:
             db_obj.get('paid_total'),
             db_obj.get('invoice_datetime'),
             db_obj.get('invoice_expiration_datetime'),
+            db_obj.get('account_type')
         )
         return obj
 

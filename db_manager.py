@@ -87,13 +87,8 @@ class DatabaseManager:
             notifications = self.db.invoice_expiration_notifications.find(
                 {
                     '$and': [
-                        {
-                            'from_date': {'$gte': from_date},
-                            'to_date': {'$gte': from_date}
-                        }, {
-                            'from_date': {'$lte': to_date},
-                            'to_date': {'$lte': to_date}
-                        },
+                        {'from_date': {'$eq': from_date}},
+                        {'to_date': {'$eq': to_date}},
                     ]
                 },
             )

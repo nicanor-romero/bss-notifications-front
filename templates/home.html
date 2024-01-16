@@ -4,7 +4,7 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-  <link rel="stylesheet" type="text/css" href="static/vendor/datatables/css/datatables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="static/vendor/datatables/css/datatables.css"/>
 {% endblock stylesheets %}
 
 {% block content %}
@@ -19,45 +19,51 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="row-border hover" id="notificationsTable" width="100%" cellspacing="0">
+                <table class="row-border hover stripe" id="notificationsTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Código Cliente</th>
+                            <th>Código Particular</th>
                             <th>Razón Social</th>
                             <th>Teléfono</th>
+                            <th>Saldo CC</th>
                             <th>Fecha de factura</th>
-                            <th>Monto total a pagar</th>
-                            <th>Monto pagado</th>
-                            <th>Saldo</th>
+                            <th>Número de factura</th>
+                            <th>Total</th>
+                            <th>Pagado</th>
+                            <th>Saldo factura</th>
                             <th>Estado</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for notification in notifications %}
-                        <tr>
-                            <td>{{ notification.client_info.id }}</td>
-                            <td>{{ notification.client_info.name }}</td>
-                            <td>{{ notification.client_info.phone }}</td>
-                            <td>{{ notification.invoices[0].invoice_datetime_humanized }}</td>
-                            <td>$ {{ notification.invoice_total_humanized }}</td>
-                            <td>$ {{ notification.invoice_paid_total_humanized }}</td>
-                            <td>$ {{ notification.invoice_unpaid_total_humanized }}</td>
+                            {% for invoice in notification.invoices %}
+                            <tr>
+                                <td>{{ notification.client_info.id }}</td>
+                                <td>{{ notification.client_info.name }}</td>
+                                <td>{{ notification.client_info.phone }}</td>
+                                <td>$ {{ notification.client_info.account_debt_humanized }}</td>
+                                <td>{{ invoice.invoice_datetime_humanized }}</td>
+                                <td>{{ invoice.invoice_number }}</td>
+                                <td>$ {{ invoice.total_humanized }}</td>
+                                <td>$ {{ invoice.paid_total_humanized }}</td>
+                                <td>$ {{ invoice.unpaid_humanized }}</td>
 
-                            <td>
-                                <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
-                                <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
-                                <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
-                            </td>
-                            <td>
-                                <button id="{{ notification.id }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
-                                    <i class="fa-solid fa-paper-plane me-2"></i>Enviar</button>
-                                <button id="{{ notification.id }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
-                                    <i class="fa-solid fa-ban me-2"></i>Deshabilitar</button>
-                            </td>
-                        </tr>
+                                <td>
+                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
+                                    <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
+                                </td>
+                                <td>
+                                    <button id="{{ notification.id }}-send-button" class="btn btn-outline-success notification-send" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                        <i class="fa-solid fa-paper-plane"></i></button>
+                                    <button id="{{ notification.id }}-disable-button" class="btn btn-outline-warning notification-disable" data-notification-id="{{ notification.id }}" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}>
+                                        <i class="fa-solid fa-ban"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -197,6 +203,8 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascript %}
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
-  <script src="static/js/datatables.js"></script>
+    <script src="static/vendor/datatables/js/jquery.dataTables.js"></script>
+    <script src="static/vendor/datatables/js/datatables.rowGroup.js"></script>
+    <!-- Script with particular datatable configuration -->
+    <script src="static/js/datatables.js"></script>
 {% endblock javascript %}

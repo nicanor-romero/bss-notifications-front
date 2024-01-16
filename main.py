@@ -47,6 +47,8 @@ def home():
     to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=19), datetime.datetime.min.time())
     notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
     notifications = humanize_notifications(notifications)
+    # Sort notifications by client name
+    notifications = sorted(notifications, key=lambda n: n.client_info.name)
     return flask.render_template('home.html', notifications=notifications, **global_variables())
 
 
@@ -56,9 +58,11 @@ def humanize_notifications(notifications):
         n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
         n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
         n.invoice_unpaid_total_humanized = to_spanish_number_str(n.invoice_total - n.invoice_paid_total)
+        n.client_info.account_debt_humanized = to_spanish_number_str(int(n.client_info.account_debt)) if n.client_info.account_debt else '?'
         for inv in n.invoices:
             inv.total_humanized = to_spanish_number_str(inv.total)
             inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)
+            inv.unpaid_humanized = to_spanish_number_str(inv.total - inv.paid_total)
             inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
             inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
     return notifications
@@ -149,4 +153,4 @@ app.register_error_handler(500, internal_server_error)
 
 db_manager = m_db_manager.DatabaseManager(db_secrets)
 if __name__ == "__main__":
-    app.run(debug=True, host="localhost", port=int(os.environ.get("PORT", 8080)), ssl_context='adhoc')
+    app.run(debug=True, host="localhost", port=int(os.environ.get("PORT", 8090)), ssl_context=('server.crt', 'server.key'))
