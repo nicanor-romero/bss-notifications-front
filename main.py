@@ -52,6 +52,30 @@ def home():
     return flask.render_template('home.html', notifications=notifications, **global_variables())
 
 
+@app.route('/set-notification-status', methods=["POST"])
+@check_if_logged_in
+def set_notification_status():
+    notification_id = flask.request.form.get('notification_id')
+    if not notification_id:
+        return {'ok': False}
+
+    status = flask.request.form.get('status')
+    if notification_id is None or status not in status_to_human:
+        return {'ok': False}
+
+    ok = db_manager.set_db_invoice_expiration_notification_status(notification_id, status)
+    return {'ok': ok, 'status': status, 'status_humanized': status_to_human.get(status)}
+
+
+@app.route('/whatsapp-webhook', methods=["GET"])
+def whatsapp_webhook():
+    log.debug('Got call at whatsapp_webook!')
+    WHATSAPP_VERIFY_TOKEN = '8v34L0HH3sq0iu1fnqx2JUPJ'
+    form = flask.request.form
+    log.debug('Got form: {}'.format(form))
+    return {'ok': True}
+
+
 def humanize_notifications(notifications):
     for n in notifications:
         n.status_humanized = status_to_human.get(n.status)
@@ -100,21 +124,6 @@ def logout():
     flask.session.pop('username', None)
     flask.session.pop('user_name', None)
     return flask.redirect(flask.url_for("home"))
-
-
-@app.route('/set-notification-status', methods=["POST"])
-@check_if_logged_in
-def set_notification_status():
-    notification_id = flask.request.form.get('notification_id')
-    if not notification_id:
-        return {'ok': False}
-
-    status = flask.request.form.get('status')
-    if notification_id is None or status not in status_to_human:
-        return {'ok': False}
-
-    ok = db_manager.set_db_invoice_expiration_notification_status(notification_id, status)
-    return {'ok': ok, 'status': status, 'status_humanized': status_to_human.get(status)}
 
 
 @app.errorhandler(404)

@@ -25,7 +25,6 @@
                             <th>Código Particular</th>
                             <th>Razón Social</th>
                             <th>Teléfono</th>
-                            <th>Saldo CC</th>
                             <th>Fecha de factura</th>
                             <th>Número de factura</th>
                             <th>Total</th>
@@ -42,18 +41,17 @@
                                 <td>{{ notification.client_info.id }}</td>
                                 <td>{{ notification.client_info.name }}</td>
                                 <td>{{ notification.client_info.phone }}</td>
-                                <td>$ {{ notification.client_info.account_debt_humanized }}</td>
                                 <td>{{ invoice.invoice_datetime_humanized }}</td>
-                                <td>{{ invoice.invoice_number }}</td>
+                                <td>{{ invoice.invoice_number }} ({{ invoice.account_type }})</td>
                                 <td>$ {{ invoice.total_humanized }}</td>
                                 <td>$ {{ invoice.paid_total_humanized }}</td>
                                 <td>$ {{ invoice.unpaid_humanized }}</td>
 
                                 <td>
-                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
-                                    <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
-                                    <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
-                                    <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock text-info" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner text-warning" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban text-danger" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
                                     <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
                                 </td>
                                 <td>
