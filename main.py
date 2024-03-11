@@ -137,10 +137,11 @@ def whatsapp_webhook():
 
         request_signature = flask.request.headers.get('x-hub-signature-256')
         log.debug('Got request_signature: {}'.format(request_signature))
+        if request_signature is None:
+            log.error('Got missing request_signature in whatsapp_webhook POST')
+            return flask.abort(403)
 
-        app_secret = '5b24ab129277260dffefad1619d0e420'
-        # app_secret = os.environ.get('APP_SECRET')
-
+        app_secret = os.environ.get('APP_SECRET')
         request_signature_ok = verify_signature(flask.request.data, app_secret, request_signature)
         if not request_signature_ok:
             log.error('Got invalid request_signature in whatsapp_webhook POST')
@@ -179,7 +180,9 @@ def verify_signature(payload_body, secret_token, signature_header):
     hash_object = hmac.new(secret_token.encode('utf-8'), msg=payload_body, digestmod=hashlib.sha256)
     expected_signature = "sha256=" + hash_object.hexdigest()
     if not hmac.compare_digest(expected_signature, signature_header):
+        log.error('Got invalid signature in verify_signature')
         return False
+    log.info('Got valid signature in verify_signature')
     return True
 
 

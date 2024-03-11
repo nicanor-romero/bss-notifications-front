@@ -48,7 +48,7 @@ if $found_existing; then
   gcloud run services update ${cloud_run_service_name} --image=${image_tag}:latest --region=us-central1 --labels="tenant=${tenant}"
 else
   echo "  🟦 New service detected, setting empty env variables"
-  gcloud run deploy ${cloud_run_service_name} --allow-unauthenticated --image=${image_tag}:latest --max-instances=1 --labels="tenant=${tenant}" --region=us-central1 --set-env-vars="DB_PASSWORD=<SET_DB_PASSWORD_HERE>,DB_USERNAME=<SET_DB_USERNAME_HERE>,FLASK_SECRET_KEY=<SET_FLASK_SECRET_KEY_HERE>,DB_SECRETS_KEY=<SET_DB_SECRETS_KEY_HERE>"
+  gcloud run deploy ${cloud_run_service_name} --allow-unauthenticated --image=${image_tag}:latest --max-instances=1 --labels="tenant=${tenant}" --region=us-central1 --set-env-vars="DB_PASSWORD=<SET_DB_PASSWORD_HERE>,DB_USERNAME=<SET_DB_USERNAME_HERE>,FLASK_SECRET_KEY=<SET_FLASK_SECRET_KEY_HERE>,DB_SECRETS_KEY=<SET_DB_SECRETS_KEY_HERE>,APP_SECRET_KEY=<APP_SECRET_KEY_HERE>"
 fi
 
 echo "💾 Restoring previous values..."
