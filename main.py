@@ -151,6 +151,17 @@ def whatsapp_webhook():
             log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
             return flask.abort(403)
 
+        message_id = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('id')
+        message_status = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('status')
+        status_change_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('timestamp')
+        status_change_datetime = datetime.datetime.fromtimestamp(int(status_change_timestamp))
+
+        log.info('Got message_id: {}'.format(message_id))
+        log.info('Got message_status: {}'.format(message_status))
+        log.info('Got status_change_datetime: {}'.format(status_change_datetime))
+
+        # TODO: Update message status in db
+
         return 'ok'
 
 
