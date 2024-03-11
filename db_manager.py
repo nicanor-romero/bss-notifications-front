@@ -118,6 +118,17 @@ class DatabaseManager:
             return False
         return True
 
+    def set_db_invoice_expiration_notification_message_status(self, message_id, message_status, message_update_datetime):
+        updated_at = datetime.datetime.now().astimezone(datetime.timezone.utc)
+        try:
+            self.db.invoice_expiration_notifications.update_one({'message_id': message_id}, {'$set': {'updated_at': updated_at,
+                                                                                                      'message_status': message_status,
+                                                                                                      'message_events': {message_status: message_update_datetime}}})
+        except Exception as e:
+            log.error('Got error when trying to update invoice_expiration_notification message {} status in database: {}'.format(message_id, e))
+            return False
+        return True
+
 
 log = logging.getLogger()
 

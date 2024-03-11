@@ -152,7 +152,7 @@ def whatsapp_webhook():
             return flask.abort(403)
 
         message_id = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('id')
-        message_status = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('status')
+        message_status = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('status')  # 'sent', 'delivered', 'read'
         status_change_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('timestamp')
         status_change_datetime = datetime.datetime.fromtimestamp(int(status_change_timestamp))
 
@@ -160,9 +160,8 @@ def whatsapp_webhook():
         log.info('Got message_status: {}'.format(message_status))
         log.info('Got status_change_datetime: {}'.format(status_change_datetime))
 
-        # TODO: Update message status in db
-        # 'sent', 'delivered', 'read'
-        # 2024-03-11 13:39:26
+        ok = db_manager.set_db_invoice_expiration_notification_message_status(message_id, message_status, status_change_datetime)
+        log.info('Updated message status in db: {}'.format(ok))
 
         return 'ok'
 
