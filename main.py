@@ -92,8 +92,7 @@ def whatsapp_webhook():
     if flask.request.method == "POST":
         log.debug('Got call at whatsapp_webook POST!')
         log.debug('Got json: {}'.format(flask.request.json))
-        log.debug('Got data: {}'.format(flask.request.data))
-        log.debug('Got headers: {}'.format(flask.request.headers))
+        # log.debug('Got headers: {}'.format(flask.request.headers))
 
         # {
         #   "object":"whatsapp_business_account",
@@ -162,6 +161,8 @@ def whatsapp_webhook():
         log.info('Got status_change_datetime: {}'.format(status_change_datetime))
 
         # TODO: Update message status in db
+        # 'sent', 'delivered', 'read'
+        # 2024-03-11 13:39:26
 
         return 'ok'
 
