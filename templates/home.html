@@ -52,6 +52,7 @@
                                     <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner text-warning" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban text-danger" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-dispatch-error" class="fa-solid fa-circle-exclamation text-danger" {% if notification.status != 'STATUS_DISPATCH_ERROR' %}style="display:none"{% endif %}></i>
                                     <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
                                 </td>
                                 <td>
@@ -104,6 +105,8 @@
                             document.getElementById(status_sent).style.display = null;
                         } else if (notification_status == 'STATUS_DISABLED') {
                             document.getElementById(status_disabled).style.display = null;
+                        } else if (notification_status == 'STATUS_DISPATCH_ERROR') {
+                            document.getElementById(status_dispatch_error).style.display = null;
                         }
                         return
                     };
