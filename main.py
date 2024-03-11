@@ -90,7 +90,7 @@ def whatsapp_webhook():
 
     if flask.request.method == "POST":
         log.debug('Got call at whatsapp_webook POST!')
-        log.debug('Got form: {}'.format(flask.request.form))
+        log.debug('Got json: {}'.format(flask.request.json))
         # {
         #   "field": "messages",
         #   "value": {
@@ -120,7 +120,7 @@ def whatsapp_webhook():
         #     ]
         #   }
         # }
-        field = flask.request.form.get('field')
+        field = flask.request.json.get('field')
         if field != 'messages':
             log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
             return flask.abort(403)
