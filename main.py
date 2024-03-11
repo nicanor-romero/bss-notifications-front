@@ -92,35 +92,45 @@ def whatsapp_webhook():
         log.debug('Got call at whatsapp_webook POST!')
         log.debug('Got json: {}'.format(flask.request.json))
         # {
-        #   "field": "messages",
-        #   "value": {
-        #     "messaging_product": "whatsapp",
-        #     "metadata": {
-        #       "display_phone_number": "16505551111",
-        #       "phone_number_id": "123456123"
-        #     },
-        #     "contacts": [
-        #       {
-        #         "profile": {
-        #           "name": "test user name"
-        #         },
-        #         "wa_id": "16315551181"
-        #       }
-        #     ],
-        #     "messages": [
-        #       {
-        #         "from": "16315551181",
-        #         "id": "ABGGFlA5Fpa",
-        #         "timestamp": "1504902988",
-        #         "type": "text",
-        #         "text": {
-        #           "body": "this is a text message"
+        #   "object":"whatsapp_business_account",
+        #   "entry":[
+        #     {
+        #       "id":"0",
+        #       "changes":[
+        #         {
+        #           "field":"messages",
+        #           "value":{
+        #             "messaging_product":"whatsapp",
+        #             "metadata":{
+        #               "display_phone_number":"16505551111",
+        #               "phone_number_id":"123456123"
+        #             },
+        #             "contacts":[
+        #               {
+        #                 "profile":{
+        #                   "name":"test user name"
+        #                 },
+        #                 "wa_id":"16315551181"
+        #               }
+        #             ],
+        #             "messages":[
+        #               {
+        #                 "from":"16315551181",
+        #                 "id":"ABGGFlA5Fpa",
+        #                 "timestamp":"1504902988",
+        #                 "type":"text",
+        #                 "text":{
+        #                   "body":"this is a text message"
+        #                 }
+        #               }
+        #             ]
+        #           }
         #         }
-        #       }
-        #     ]
-        #   }
+        #       ]
+        #     }
+        #   ]
         # }
-        field = flask.request.json.get('field')
+        field = flask.request.json.get('entry')[0].get('changes')[0].get('field')
         if field != 'messages':
             log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
             return flask.abort(403)
