@@ -4,7 +4,8 @@ import os
 import logging
 import commons
 import datetime
-import locale
+import hashlib
+import hmac
 import db_manager as m_db_manager
 from functools import wraps
 
@@ -91,6 +92,9 @@ def whatsapp_webhook():
     if flask.request.method == "POST":
         log.debug('Got call at whatsapp_webook POST!')
         log.debug('Got json: {}'.format(flask.request.json))
+        log.debug('Got data: {}'.format(flask.request.data))
+        log.debug('Got headers: {}'.format(flask.request.headers))
+
         # {
         #   "object":"whatsapp_business_account",
         #   "entry":[
@@ -130,11 +134,42 @@ def whatsapp_webhook():
         #     }
         #   ]
         # }
+
+        request_signature = flask.request.headers.get('x-hub-signature-256')
+        log.debug('Got request_signature: {}'.format(request_signature))
+
+        app_secret = '5b24ab129277260dffefad1619d0e420'
+        # app_secret = os.environ.get('APP_SECRET')
+
+        request_signature_ok = verify_signature(flask.request.data, app_secret, request_signature)
+        if not request_signature_ok:
+            log.error('Got invalid request_signature in whatsapp_webhook POST')
+            return flask.abort(403)
+
         field = flask.request.json.get('entry')[0].get('changes')[0].get('field')
         if field != 'messages':
             log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
             return flask.abort(403)
+
         return 'ok'
+
+
+def verify_signature(payload_body, secret_token, signature_header):
+    # https://docs.github.com/es/webhooks/using-webhooks/validating-webhook-deliveries#python-example
+    """Verify that the payload was sent from GitHub by validating SHA256.
+
+    Raise and return 403 if not authorized.
+
+    Args:
+        payload_body: original request body to verify (request.body())
+        secret_token: App webhook token (WEBHOOK_SECRET)
+        signature_header: header received from GitHub (x-hub-signature-256)
+    """
+    hash_object = hmac.new(secret_token.encode('utf-8'), msg=payload_body, digestmod=hashlib.sha256)
+    expected_signature = "sha256=" + hash_object.hexdigest()
+    if not hmac.compare_digest(expected_signature, signature_header):
+        return False
+    return True
 
 
 def humanize_notifications(notifications):
