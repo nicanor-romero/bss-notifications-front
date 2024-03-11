@@ -123,7 +123,7 @@ class DatabaseManager:
         try:
             self.db.invoice_expiration_notifications.update_one({'message_id': message_id}, {'$set': {'updated_at': updated_at,
                                                                                                       'message_status': message_status,
-                                                                                                      'message_events': {message_status: message_update_datetime}}})
+                                                                                                      'message_events.' + message_status: message_update_datetime}})
         except Exception as e:
             log.error('Got error when trying to update invoice_expiration_notification message {} status in database: {}'.format(message_id, e))
             return False
