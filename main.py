@@ -67,13 +67,64 @@ def set_notification_status():
     return {'ok': ok, 'status': status, 'status_humanized': status_to_human.get(status)}
 
 
-@app.route('/whatsapp-webhook', methods=["GET"])
+@app.route('/whatsapp-webhook', methods=["GET", "POST"])
 def whatsapp_webhook():
-    log.debug('Got call at whatsapp_webook!')
-    WHATSAPP_VERIFY_TOKEN = '8v34L0HH3sq0iu1fnqx2JUPJ'
-    form = flask.request.form
-    log.debug('Got form: {}'.format(form))
-    return {'ok': True}
+    if flask.request.method == "GET":
+        log.debug('Got call at whatsapp_webook GET!')
+        WHATSAPP_VERIFY_TOKEN = '8v34L0HH3sq0iu1fnqx2JUPJ'
+
+        # [('hub.mode', 'subscribe'), ('hub.challenge', '1776433461'), ('hub.verify_token', '8v34L0HH3sq0iu1fnqx2JUPJ')])
+
+        verify_token = flask.request.args.get('hub.verify_token')
+        log.info('Got verify_token: {}'.format(verify_token))
+
+        if verify_token != WHATSAPP_VERIFY_TOKEN:
+            log.info('Returning 403 to whatsapp_webook')
+            return flask.abort(403)
+
+        challenge = flask.request.args.get('hub.challenge')
+        log.info('Got challenge: {}'.format(challenge))
+
+        log.info('Returning challenge to whatsapp_webook')
+        return challenge
+
+    if flask.request.method == "POST":
+        log.debug('Got call at whatsapp_webook POST!')
+        log.debug('Got form: {}'.format(flask.request.form))
+        # {
+        #   "field": "messages",
+        #   "value": {
+        #     "messaging_product": "whatsapp",
+        #     "metadata": {
+        #       "display_phone_number": "16505551111",
+        #       "phone_number_id": "123456123"
+        #     },
+        #     "contacts": [
+        #       {
+        #         "profile": {
+        #           "name": "test user name"
+        #         },
+        #         "wa_id": "16315551181"
+        #       }
+        #     ],
+        #     "messages": [
+        #       {
+        #         "from": "16315551181",
+        #         "id": "ABGGFlA5Fpa",
+        #         "timestamp": "1504902988",
+        #         "type": "text",
+        #         "text": {
+        #           "body": "this is a text message"
+        #         }
+        #       }
+        #     ]
+        #   }
+        # }
+        field = flask.request.form.get('field')
+        if field != 'messages':
+            log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
+            return flask.abort(403)
+        return 'ok'
 
 
 def humanize_notifications(notifications):
