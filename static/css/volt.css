@@ -970,8 +970,8 @@ sup {
     top: -.5em;
 }
 a {
-    color: #262b40;
-    text-decoration: none;
+    color: #1a3ed4;
+    text-decoration: underline;
 }
 a:hover {
     color: #000;

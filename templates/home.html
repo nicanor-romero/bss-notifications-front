@@ -40,7 +40,7 @@
                             <tr>
                                 <td>{{ notification.client_info.id }}</td>
                                 <td>{{ notification.client_info.name }}</td>
-                                <td>{{ notification.client_info.phone }}</td>
+                                <td>{% if notification.client_info.phone != '-' %}<a href="https://wa.me/{{ notification.client_info.phone }}" target="_blank">{{ notification.client_info.phone }}</a>{% else %}{{ notification.client_info.phone }}{% endif %}</td>
                                 <td>{{ invoice.invoice_datetime_humanized }}</td>
                                 <td>{{ invoice.invoice_number }} ({{ invoice.account_type }})</td>
                                 <td>$ {{ invoice.total_humanized }}</td>
@@ -127,6 +127,7 @@
                     $(".notification-send").click(function(event) {
                         var notification_id = $(this).attr('data-notification-id')
                         var status_dom_id = notification_id + '-status';
+                        var status_pending_approval = notification_id + '-status-pending-approval';
                         var send_button_dom_id = notification_id + '-send-button';
                         var disable_button_dom_id = notification_id + '-disable-button';
 
@@ -134,7 +135,8 @@
                         document.getElementById(disable_button_dom_id).disabled = true;
 
                         var previous_status_html = document.getElementById(status_dom_id).innerHTML;
-                        document.getElementById(status_dom_id).innerHTML = '<i class="fa-solid fa-spinner"></i> En espera...';
+                        document.getElementById(status_pending_approval).style.display = 'fa-solid fa-spinner text-warning';
+                        document.getElementById(status_dom_id).innerHTML = 'En espera...';
 
                         $.post('/set-notification-status', {notification_id: notification_id, status: 'STATUS_PENDING_DISPATCH'}, function(data) {
                             var notyf = new Notyf({duration: 5000});
