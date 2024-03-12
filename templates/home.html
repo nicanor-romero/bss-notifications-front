@@ -50,7 +50,10 @@
                                 <td>
                                     <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock text-info" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner text-warning" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
-                                    <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-info" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-send-confirmed" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SEND_CONFIRMED' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-received" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_RECEIVED' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-read" class="fa-solid fa-circle-check text-success" {% if notification.status != 'STATUS_READ' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-disabled" class="fa-solid fa-ban text-danger" {% if notification.status != 'STATUS_DISABLED' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-dispatch-error" class="fa-solid fa-circle-exclamation text-danger" {% if notification.status != 'STATUS_DISPATCH_ERROR' %}style="display:none"{% endif %}></i>
                                     <span id="{{ notification.id }}-status">{{ notification.status_humanized }}</span>
@@ -74,7 +77,11 @@
                         var status_pending_approval = notification_id + '-status-pending-approval';
                         var status_pending_dispatch = notification_id + '-status-pending-dispatch';
                         var status_sent = notification_id + '-status-sent';
+                        var status_send_confirmed = notification_id + '-status-send-confirmed';
+                        var status_received = notification_id + '-status-received';
+                        var status_read = notification_id + '-status-read';
                         var status_disabled = notification_id + '-status-disabled';
+                        var status_dispatch_error = notification_id + '-status-dispatch-error';
 
                         var button_send = notification_id + '-send-button';
                         var button_disable = notification_id + '-disable-button';
@@ -103,6 +110,12 @@
                             document.getElementById(status_pending_dispatch).style.display = null;
                         } else if (notification_status == 'STATUS_SENT') {
                             document.getElementById(status_sent).style.display = null;
+                        } else if (notification_status == 'STATUS_SEND_CONFIRMED') {
+                            document.getElementById(status_send_confirmed).style.display = null;
+                        } else if (notification_status == 'STATUS_RECEIVED') {
+                            document.getElementById(status_received).style.display = null;
+                        } else if (notification_status == 'STATUS_READ') {
+                            document.getElementById(status_read).style.display = null;
                         } else if (notification_status == 'STATUS_DISABLED') {
                             document.getElementById(status_disabled).style.display = null;
                         } else if (notification_status == 'STATUS_DISPATCH_ERROR') {

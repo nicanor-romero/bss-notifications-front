@@ -16,14 +16,20 @@ local_tz = pytz.timezone('America/Argentina/Cordoba')
 STATUS_PENDING_APPROVAL = 'STATUS_PENDING_APPROVAL'
 STATUS_PENDING_DISPATCH = 'STATUS_PENDING_DISPATCH'
 STATUS_SENT = 'STATUS_SENT'
+STATUS_SEND_CONFIRMED = 'STATUS_SEND_CONFIRMED'
+STATUS_RECEIVED = 'STATUS_RECEIVED'
+STATUS_READ = 'STATUS_READ'
 STATUS_DISABLED = 'STATUS_DISABLED'
-STATUS_DISPATCH_ERROR = 'STATUS_DISPATCH_ERROR'
 STATUS_EXPIRED = 'STATUS_EXPIRED'
+STATUS_DISPATCH_ERROR = 'STATUS_DISPATCH_ERROR'
 
 status_to_human = {
     STATUS_PENDING_APPROVAL: 'Pendiente',
     STATUS_PENDING_DISPATCH: 'Enviando...',
     STATUS_SENT: 'Enviada',
+    STATUS_SEND_CONFIRMED: 'Envío confirmado',
+    STATUS_RECEIVED: 'Recibido',
+    STATUS_READ: 'Leído',
     STATUS_DISABLED: 'Deshabilitada',
     STATUS_DISPATCH_ERROR: 'Error de envío',
     STATUS_EXPIRED: 'Expirada',
@@ -162,7 +168,17 @@ def whatsapp_webhook():
         log.info('Got message_status: {}'.format(message_status))
         log.info('Got status_change_datetime: {}'.format(status_change_datetime))
 
-        ok = db_manager.set_db_invoice_expiration_notification_message_status(message_id, message_status, status_change_datetime)
+        if message_status == 'sent':
+            notification_status = STATUS_SEND_CONFIRMED
+        elif message_status == 'delivered':
+            notification_status = STATUS_RECEIVED
+        elif message_status == 'read':
+            notification_status = STATUS_READ
+        else:
+            log.error('Got unexpected message_status in whatsapp_webhook POST: {}'.format(message_status))
+            return 'ok'
+
+        ok = db_manager.set_db_invoice_expiration_notification_message_status(message_id, notification_status, message_status, status_change_datetime)
         log.info('Updated message status in db: {}'.format(ok))
 
         return 'ok'
