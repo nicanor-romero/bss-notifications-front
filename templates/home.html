@@ -40,7 +40,8 @@
                             <tr>
                                 <td>{{ notification.client_info.id }}</td>
                                 <td>{{ notification.client_info.name }}</td>
-                                <td>{% if notification.client_info.phone != '-' %}<a href="https://wa.me/{{ notification.client_info.phone }}" target="_blank">{{ notification.client_info.phone }}</a>{% else %}{{ notification.client_info.phone }}{% endif %}</td>
+                                <td>{% if not notification.client_info.phone_valid %}<i class="fa-solid fa-triangle-exclamation text-warning"></i>{% endif %}
+                                    {% if notification.client_info.phone_valid %}<a href="https://wa.me/{{ notification.client_info.phone }}" target="_blank"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i></a>{% endif %}  {{ notification.client_info.phone_humanized }}</td>
                                 <td>{{ invoice.invoice_datetime_humanized }}</td>
                                 <td>{{ invoice.invoice_number }} ({{ invoice.account_type }})</td>
                                 <td>$ {{ invoice.total_humanized }}</td>
@@ -48,7 +49,7 @@
                                 <td>$ {{ invoice.unpaid_humanized }}</td>
 
                                 <td>
-                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock text-gray-400" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner text-warning" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-info" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-send-confirmed" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SEND_CONFIRMED' %}style="display:none"{% endif %}></i>
