@@ -48,7 +48,7 @@
                                 <td>$ {{ invoice.unpaid_humanized }}</td>
 
                                 <td>
-                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock text-info" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
+                                    <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-pending-dispatch" class="fa-solid fa-spinner text-warning" {% if notification.status != 'STATUS_PENDING_DISPATCH' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-sent" class="fa-regular fa-circle-check text-info" {% if notification.status != 'STATUS_SENT' %}style="display:none"{% endif %}></i>
                                     <i id="{{ notification.id }}-status-send-confirmed" class="fa-regular fa-circle-check text-success" {% if notification.status != 'STATUS_SEND_CONFIRMED' %}style="display:none"{% endif %}></i>
@@ -182,37 +182,6 @@
                 </script>
             </div>
         </div>
-    </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-body text-end">
-            <button type="submit" id="notifications-send-all" class="btn btn-secondary notifications-send-all"><i class="fa-solid fa-paper-plane mx-1" style="color:#f2f4f6"></i>    Enviar Todos</button>
-        </div>
-
-        <script>
-            $(".notifications-send-all").click(function(event) {
-                console.log("Sending all notifications");
-
-                var notification_id = $(this).attr('data-notification-id')
-                var send_button_dom_id = notification_id + '-send-button';
-                var disable_button_dom_id = notification_id + '-disable-button';
-
-                document.getElementById(send_button_dom_id).disabled = true;
-                document.getElementById(disable_button_dom_id).disabled = true;
-
-                $.post('/set-notification-status-all', {status: 'STATUS_PENDING_DISPATCH'}, function(data) {
-                    var notyf = new Notyf({duration: 5000});
-                    if (data['ok']) {
-                        notyf.success('Notificaciones programadas correctamente');
-                    } else {
-                        notyf.error('Error al intentar enviar notificaciones');
-                    }
-                    document.getElementById(send_button_dom_id).disabled = false;
-                    document.getElementById(disable_button_dom_id).disabled = false;
-                });
-                return;
-            });
-        </script>
     </div>
 
 {% endblock content %}
