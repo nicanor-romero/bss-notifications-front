@@ -328,16 +328,6 @@ def internal_server_error(e=None):
     return flask.render_template("error_500.html", **global_variables()), 500
 
 
-@app.route('/terms', methods=["GET"])
-def terms_of_use():
-    return flask.render_template('terms_of_use.html')
-
-
-@app.route('/privacy', methods=["GET"])
-def privacy_policy():
-    return flask.render_template('privacy_policy.html')
-
-
 commons.configure_logger('bss_notifications_front')
 log = logging.getLogger()
 config = commons.get_config()
