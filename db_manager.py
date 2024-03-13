@@ -10,21 +10,22 @@ import cryptography.fernet as fernet
 import notifications as m_notifications
 
 
+CLUSTER_URL = "cluster0.hukxd5k.mongodb.net"
+
+
 class DatabaseManager:
     def __init__(self, db_secrets):
-        cluster_url = "cluster0.hukxd5k.mongodb.net"
-        db_name = 'bss-notifications-skymedic'
-
         if db_secrets.get('fernet_key') is None:
             log.error('Unable to get fernet key from environment')
             exit(1)
 
         self.fernet = fernet.Fernet(db_secrets.get('fernet_key'))
+        db_name = db_secrets.get('db_name')
         username = db_secrets.get('username')
         password = db_secrets.get('password')
 
         ca = certifi.where()
-        self.client = pymongo.MongoClient('mongodb+srv://{}:{}@{}/admin?retryWrites=true&w=majority'.format(username, password, cluster_url), tlsCAFile=ca)
+        self.client = pymongo.MongoClient('mongodb+srv://{}:{}@{}/admin?retryWrites=true&w=majority'.format(username, password, CLUSTER_URL), tlsCAFile=ca)
         self.db = self.client[db_name]
         connection_status = self.db.command({'connectionStatus': 1})
         if connection_status.get('ok'):
@@ -136,6 +137,7 @@ log = logging.getLogger()
 if __name__ == '__main__':
     commons.configure_logger('db_manager')
     db_secrets = {
+        'db_name': os.environ.get('DB_NAME'),
         'username': os.environ.get('DB_USERNAME'),
         'password': os.environ.get('DB_PASSWORD'),
         'fernet_key': os.environ.get('DB_SECRETS_KEY')

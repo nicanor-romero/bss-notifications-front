@@ -325,6 +325,7 @@ def privacy_policy():
 commons.configure_logger('bss_notifications_front')
 log = logging.getLogger()
 db_secrets = {
+    'db_name': os.environ.get('DB_NAME'),
     'username': os.environ.get('DB_USERNAME'),
     'password': os.environ.get('DB_PASSWORD'),
     'fernet_key': os.environ.get('DB_SECRETS_KEY')
