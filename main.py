@@ -193,9 +193,7 @@ def whatsapp_webhook():
                 message_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('timestamp')
                 message_origin = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('from')
                 message_content = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('text').get('body')
-                log.info('message timestamp: {}'.format(message_timestamp))
-                log.info('message origin: {}'.format(message_origin))
-                log.info('message content: {}'.format(message_content))
+                log.info('Got message from {} at {}: {}'.format(message_origin, message_timestamp, message_content))
 
             except Exception as e:
                 log.error('Got error while trying to get message content: {}'.format(e))
