@@ -81,15 +81,15 @@ def set_notification_status():
 @app.route('/whatsapp-webhook', methods=["GET", "POST"])
 def whatsapp_webhook():
     if flask.request.method == "GET":
-        log.debug('Got call at whatsapp_webook GET!')
-        WHATSAPP_VERIFY_TOKEN = '8v34L0HH3sq0iu1fnqx2JUPJ'
-
         # [('hub.mode', 'subscribe'), ('hub.challenge', '1776433461'), ('hub.verify_token', '8v34L0HH3sq0iu1fnqx2JUPJ')])
+        log.debug('Got call at whatsapp_webook GET!')
+
+        whatsapp_verify_token = db_manager.get_whatsapp_verify_token_secret(config.get('general').get('tenant_id')).get('verify_token')
 
         verify_token = flask.request.args.get('hub.verify_token')
         log.info('Got verify_token: {}'.format(verify_token))
 
-        if verify_token != WHATSAPP_VERIFY_TOKEN:
+        if verify_token != whatsapp_verify_token:
             log.info('Returning 403 to whatsapp_webook')
             return flask.abort(403)
 
@@ -150,7 +150,7 @@ def whatsapp_webhook():
             log.error('Got missing request_signature in whatsapp_webhook POST')
             return flask.abort(403)
 
-        app_secret = os.environ.get('APP_SECRET')
+        app_secret = db_manager.get_whatsapp_app_secret(config.get('whatsapp').get('app_id')).get('app_secret')
         request_signature_ok = verify_signature(flask.request.data, app_secret, request_signature)
         if not request_signature_ok:
             log.error('Got invalid request_signature in whatsapp_webhook POST')
@@ -324,8 +324,8 @@ def privacy_policy():
 
 commons.configure_logger('bss_notifications_front')
 log = logging.getLogger()
+config = commons.get_config()
 db_secrets = {
-    'db_name': os.environ.get('DB_NAME'),
     'username': os.environ.get('DB_USERNAME'),
     'password': os.environ.get('DB_PASSWORD'),
     'fernet_key': os.environ.get('DB_SECRETS_KEY')
@@ -335,6 +335,6 @@ app.register_error_handler(404, page_not_found)
 app.register_error_handler(500, internal_server_error)
 
 
-db_manager = m_db_manager.DatabaseManager(db_secrets)
+db_manager = m_db_manager.DatabaseManager(config.get('db'), db_secrets)
 if __name__ == "__main__":
     app.run(debug=True, host="localhost", port=int(os.environ.get("PORT", 8090)), ssl_context=('server.crt', 'server.key'))

@@ -10,22 +10,20 @@ import cryptography.fernet as fernet
 import notifications as m_notifications
 
 
-CLUSTER_URL = "cluster0.hukxd5k.mongodb.net"
-
-
 class DatabaseManager:
-    def __init__(self, db_secrets):
+    def __init__(self, db_config, db_secrets):
         if db_secrets.get('fernet_key') is None:
             log.error('Unable to get fernet key from environment')
             exit(1)
 
         self.fernet = fernet.Fernet(db_secrets.get('fernet_key'))
-        db_name = db_secrets.get('db_name')
+        cluster_url = db_config.get('cluster_url')
+        db_name = db_config.get('db_name')
         username = db_secrets.get('username')
         password = db_secrets.get('password')
 
         ca = certifi.where()
-        self.client = pymongo.MongoClient('mongodb+srv://{}:{}@{}/admin?retryWrites=true&w=majority'.format(username, password, CLUSTER_URL), tlsCAFile=ca)
+        self.client = pymongo.MongoClient('mongodb+srv://{}:{}@{}/admin?retryWrites=true&w=majority'.format(username, password, cluster_url), tlsCAFile=ca)
         self.db = self.client[db_name]
         connection_status = self.db.command({'connectionStatus': 1})
         if connection_status.get('ok'):
@@ -131,16 +129,78 @@ class DatabaseManager:
             return False
         return True
 
+    # Secrets
+    def set_whatsapp_app_secret(self, app_id, app_secret):
+        app_secret_encrypted = self.fernet.encrypt(app_secret.encode('ascii'))
+        secret = {
+            '_id': 'whatsapp_app_{}'.format(app_id),
+            'type': 'whatsapp_app',
+            'app_secret_encrypted': app_secret_encrypted,
+        }
+        try:
+            result = self.db.secrets.insert_one(secret)
+        except Exception as e:
+            log.error('Got error when trying to set whatsapp app secret: {}'.format(e))
+            return False
+        return result is not None
+
+    def get_whatsapp_app_secret(self, app_id):
+        key = 'whatsapp_app_{}'.format(app_id)
+        try:
+            secret = self.db.secrets.find_one({'_id': key})
+        except Exception as e:
+            log.error('Got error when trying to get whatsapp app secret: {}'.format(e))
+            return False
+
+        secret['app_secret'] = self.fernet.decrypt(secret.get('app_secret_encrypted')).decode('ascii')
+        secret.pop('app_secret_encrypted')
+        return secret
+
+    def set_whatsapp_verify_token_secret(self, tenant_id, app_secret):
+        verify_token_encrypted = self.fernet.encrypt(app_secret.encode('ascii'))
+        secret = {
+            '_id': 'whatsapp_verify_token_{}'.format(tenant_id),
+            'type': 'whatsapp_verify_token',
+            'verify_token_encrypted': verify_token_encrypted,
+        }
+        try:
+            result = self.db.secrets.insert_one(secret)
+        except Exception as e:
+            log.error('Got error when trying to set whatsapp verify token secret: {}'.format(e))
+            return False
+        return result is not None
+
+    def get_whatsapp_verify_token_secret(self, tenant_id):
+        key = 'whatsapp_verify_token_{}'.format(tenant_id)
+        try:
+            secret = self.db.secrets.find_one({'_id': key})
+        except Exception as e:
+            log.error('Got error when trying to get whatsapp verify token secret: {}'.format(e))
+            return False
+
+        secret['verify_token'] = self.fernet.decrypt(secret.get('verify_token_encrypted')).decode('ascii')
+        secret.pop('verify_token_encrypted')
+        return secret
+
+
 
 log = logging.getLogger()
 
 if __name__ == '__main__':
     commons.configure_logger('db_manager')
+
+    config = commons.get_config()
     db_secrets = {
-        'db_name': os.environ.get('DB_NAME'),
         'username': os.environ.get('DB_USERNAME'),
         'password': os.environ.get('DB_PASSWORD'),
         'fernet_key': os.environ.get('DB_SECRETS_KEY')
     }
-    db_manager = DatabaseManager(db_secrets)
-    db_manager.add_user()
+    db_manager = DatabaseManager(config.get('db'), db_secrets)
+    # db_manager.add_user()
+
+    # db_manager.set_whatsapp_app_secret(config.get('whatsapp').get('app_id'), '<app_secret_here>')
+    # app = db_manager.get_whatsapp_app_secret(config.get('whatsapp').get('app_id'))
+
+    # db_manager.set_whatsapp_verify_token_secret(config.get('general').get('tenant_id'), '<verify_token_here>')
+    # verify_token = db_manager.get_whatsapp_verify_token_secret(config.get('general').get('tenant_id'))
+

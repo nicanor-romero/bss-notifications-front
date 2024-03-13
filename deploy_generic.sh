@@ -11,8 +11,8 @@ export COMPOSE_DOCKER_CLI_BUILD=0
 echo "🛠 Building image..."
 echo "  🏷 tag:      ${image_tag}"
 echo "  🏷 git hash: ${git_hash}"
-echo "  📄 config:   ${config}"
-docker build --platform linux/amd64 -t ${image_tag} --build-arg CONFIG_ARG=${config} --quiet .
+echo "  📄 config_file:   ${config_file}"
+docker build --platform linux/amd64 -t ${image_tag} --build-arg CONFIG_FILE_ARG=${config_file} --quiet .
 
 gcloud_account_to_restore=$(gcloud config get-value account)
 gcloud_project_to_restore=$(gcloud config get-value project)

@@ -1,6 +1,6 @@
 #!/bin/sh
 
 tenant=test
-#config=config/test_config.json
+config_file=config/test_config.json
 
 . deploy_generic.sh

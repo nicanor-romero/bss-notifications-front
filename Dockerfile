@@ -10,7 +10,7 @@ RUN pip install -r requirements.txt
 RUN pip install dnspython
 RUN pip install gunicorn
 
-ARG CONFIG_ARG
-ENV CONFIG=$CONFIG_ARG
+ARG CONFIG_FILE_ARG
+ENV CONFIG_FILE=$CONFIG_FILE_ARG
 
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app

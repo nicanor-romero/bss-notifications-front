@@ -1,0 +1,13 @@
+{
+  "general": {
+    "tenant_id": "ripezzi",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "db": {
+    "cluster_url": "cluster0.hukxd5k.mongodb.net",
+    "db_name": "bss-notifications-ripezzi"
+  },
+  "whatsapp": {
+    "app_id": "1289530788331046"
+  }
+}

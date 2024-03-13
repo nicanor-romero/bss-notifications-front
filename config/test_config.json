@@ -1,0 +1,13 @@
+{
+  "general": {
+    "tenant_id": "test",
+    "timezone": "America/Argentina/Cordoba"
+  },
+  "db": {
+    "cluster_url": "cluster0.hukxd5k.mongodb.net",
+    "db_name": "bss-notifications-test"
+  },
+  "whatsapp": {
+    "app_id": "1249793669020848"
+  }
+}

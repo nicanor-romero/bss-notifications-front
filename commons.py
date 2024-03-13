@@ -52,20 +52,11 @@ def get_logger_config(log_level, log_file_path):
     }
 
 
-def parse_arguments():
-    args = {'config': os.environ.get('CONFIG', 'config/test_config.json')}
-    return args
-
-
-def load_config(config_path):
-    log.debug('Loading config: {}'.format(config_path))
-    try:
-        with open(config_path) as f:
-            c = json.load(f)
-            log.debug('Loaded config: {}'.format(c))
-    except Exception as e:
-        log.error('Got error when trying to load config file: {}'.format(e))
-    return c
+def get_config():
+    config_file = os.environ.get('CONFIG_FILE', 'config/test_config.json')
+    with open(config_file) as f:
+        config = json.load(f)
+    return config
 
 
 def http_request_get(url, timeout_sec=DEFAULT_REQUESTS_TIMEOUT_SEC):
