@@ -2,7 +2,7 @@
 
 gcloud_account=mediainnovationhub@gmail.com
 gcloud_project=notifynow-app-405611
-image_tag=us.gcr.io/${gcloud_project}/notifynow-app-front-${tenant}
+image_tag=europe-docker.pkg.dev/${gcloud_project}/eu.gcr.io/notifynow-app-front-${tenant}
 git_hash=$(git rev-parse --short HEAD)
 cloud_run_service_name=notifynow-app-front-${tenant}
 
