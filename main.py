@@ -161,27 +161,45 @@ def whatsapp_webhook():
             log.error('Got unexpected field in whatsapp_webhook POST: {}'.format(field))
             return flask.abort(403)
 
-        message_id = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('id')
-        message_status = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('status')  # 'sent', 'delivered', 'read'
-        status_change_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('timestamp')
-        status_change_datetime = datetime.datetime.fromtimestamp(int(status_change_timestamp))
+        if flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses'):
+            log.info('Got status change in whatsapp_webhook POST')
 
-        log.info('Got message_id: {}'.format(message_id))
-        log.info('Got message_status: {}'.format(message_status))
-        log.info('Got status_change_datetime: {}'.format(status_change_datetime))
+            message_id = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('id')
+            message_status = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('status')  # 'sent', 'delivered', 'read'
+            status_change_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('statuses')[0].get('timestamp')
+            status_change_datetime = datetime.datetime.fromtimestamp(int(status_change_timestamp))
 
-        if message_status == 'sent':
-            notification_status = STATUS_SEND_CONFIRMED
-        elif message_status == 'delivered':
-            notification_status = STATUS_RECEIVED
-        elif message_status == 'read':
-            notification_status = STATUS_READ
-        else:
-            log.error('Got unexpected message_status in whatsapp_webhook POST: {}'.format(message_status))
-            return 'ok'
+            log.info('Got message_id: {}'.format(message_id))
+            log.info('Got message_status: {}'.format(message_status))
+            log.info('Got status_change_datetime: {}'.format(status_change_datetime))
 
-        ok = db_manager.set_db_invoice_expiration_notification_message_status(message_id, notification_status, message_status, status_change_datetime)
-        log.info('Updated message status in db: {}'.format(ok))
+            if message_status == 'sent':
+                notification_status = STATUS_SEND_CONFIRMED
+            elif message_status == 'delivered':
+                notification_status = STATUS_RECEIVED
+            elif message_status == 'read':
+                notification_status = STATUS_READ
+            else:
+                log.error('Got unexpected message_status in whatsapp_webhook POST: {}'.format(message_status))
+                return 'ok'
+
+            ok = db_manager.set_db_invoice_expiration_notification_message_status(message_id, notification_status, message_status, status_change_datetime)
+            log.info('Updated message status in db: {}'.format(ok))
+
+        elif flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages'):
+            log.info('Got new message in whatsapp_webhook POST')
+
+            try:
+                message_timestamp = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('timestamp')
+                message_origin = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('from')
+                message_content = flask.request.json.get('entry')[0].get('changes')[0].get('value').get('messages')[0].get('text').get('body')
+                log.info('message timestamp: {}'.format(message_timestamp))
+                log.info('message origin: {}'.format(message_origin))
+                log.info('message content: {}'.format(message_content))
+
+            except Exception as e:
+                log.error('Got error while trying to get message content: {}'.format(e))
+                return 'ok'
 
         return 'ok'
 
