@@ -78,6 +78,33 @@ def set_notification_status():
     return {'ok': ok, 'status': status, 'status_humanized': status_to_human.get(status)}
 
 
+@app.route('/history', methods=["GET"])
+@check_if_logged_in
+def history():
+    if flask.request.args is None:
+        return flask.render_template('history.html', **global_variables())
+
+    # Get query params
+    start_date_str = flask.request.args.get('start_date')
+    end_date_str = flask.request.args.get('end_date')
+    # Mandatory query params
+    if start_date_str is None or end_date_str is None:
+        return flask.render_template('history.html', **global_variables())
+
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    client_id = flask.request.args.get('client_id') if flask.request.args.get('client_id') != '' else None
+    client_name = flask.request.args.get('client_name') if flask.request.args.get('client_name') != '' else None
+
+    # Get notifications from db
+    notifications = db_manager.get_db_invoice_expiration_client_notifications(client_id, client_name, start_date, end_date)
+    notifications = humanize_notifications(notifications)
+    notifications = sorted(notifications, key=lambda n: n.updated_at)
+    return flask.render_template('history.html', notifications=notifications, **global_variables())
+
+
+
 @app.route('/whatsapp-webhook', methods=["GET", "POST"])
 def whatsapp_webhook():
     if flask.request.method == "GET":
@@ -237,6 +264,8 @@ def humanize_notifications(notifications):
             inv.unpaid_humanized = to_spanish_number_str(inv.total - inv.paid_total)
             inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
             inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
+        n.created_at_humanized = n.created_at.strftime('%d/%m/%Y %H:%M:%S')
+        n.updated_at_humanized = n.updated_at.strftime('%d/%m/%Y %H:%M:%S')
     return notifications
 
 

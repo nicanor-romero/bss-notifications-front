@@ -36,6 +36,8 @@ class InvoiceExpirationNotification:
             db_obj.get('to_date')
         )
         obj.status = db_obj.get('status')
+        obj.created_at = db_obj.get('created_at')
+        obj.updated_at = db_obj.get('updated_at')
         return obj
 
     def to_db(self):

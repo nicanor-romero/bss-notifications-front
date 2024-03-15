@@ -97,6 +97,30 @@ class DatabaseManager:
             return
         return [m_notifications.InvoiceExpirationNotification.from_db(n) for n in notifications] if notifications else []
 
+    # get_db_invoice_expiration_client_notifications can receive a client_id, a client_name or both
+    def get_db_invoice_expiration_client_notifications(self, client_id, client_name, from_date, to_date):
+        and_conditions = [
+            {'updated_at': {'$gte': from_date}},
+            {'updated_at': {'$lte': to_date}}
+        ]
+        if client_id:
+            and_conditions.append({'client_info.id': {'$eq': client_id}})
+        if client_name:
+            and_conditions.append({'client_info.name': {'$eq': client_name}})
+
+        try:
+            notifications = self.db.invoice_expiration_notifications.find(
+                {
+                    '$and': and_conditions
+                },
+            )
+
+        except Exception as e:
+            log.error('Got error when trying to get invoice_expiration_notifications from {} to {} from database: {}'.format(from_date, to_date, e))
+            return
+        return [m_notifications.InvoiceExpirationNotification.from_db(n) for n in notifications] if notifications else []
+
+
     def set_db_invoice_expiration_notification_status(self, invoice_expiration_notification_id, status):
         # Get status first
         try:
