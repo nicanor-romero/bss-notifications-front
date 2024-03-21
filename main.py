@@ -54,13 +54,44 @@ def global_variables():
 @app.route('/', methods=["GET"])
 @check_if_logged_in
 def home():
-    from_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=20), datetime.datetime.min.time())
-    to_date = datetime.datetime.combine(datetime.datetime.today() - datetime.timedelta(days=19), datetime.datetime.min.time())
+    expire_in = datetime.timedelta(days=10)
+    if flask.request.args and flask.request.args.get('expire_in'):
+        expire_in_days = flask.request.args.get('expire_in')
+        expire_in = datetime.timedelta(days=int(expire_in_days))
+
+    invoice_expiration_day = datetime.datetime.combine(datetime.datetime.today() + expire_in, datetime.datetime.min.time())
+
+    # Get invoices created 30 days before the desired expiration day
+    from_date = invoice_expiration_day - datetime.timedelta(days=30)
+    to_date = from_date
+
+    log.info('Getting invoice expiration notifications from {} to {}'.format(from_date, to_date))
+
     notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
     notifications = humanize_notifications(notifications)
     # Sort notifications by client name
     notifications = sorted(notifications, key=lambda n: n.client_info.name)
-    return flask.render_template('home.html', notifications=notifications, **global_variables())
+    return flask.render_template('home.html', notifications=notifications, expire_in=expire_in.days, **global_variables())
+
+
+def humanize_notifications(notifications):
+    for n in notifications:
+        n.status_humanized = status_to_human.get(n.status)
+        n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
+        n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
+        n.invoice_unpaid_total_humanized = to_spanish_number_str(n.invoice_total - n.invoice_paid_total)
+        n.client_info.phone_valid = check_if_phone_is_valid(n.client_info.phone)
+        n.client_info.phone_humanized = humanize_phone_number(n.client_info.phone) if n.client_info.phone_valid else n.client_info.phone
+        n.client_info.account_debt_humanized = to_spanish_number_str(int(n.client_info.account_debt)) if n.client_info.account_debt else '?'
+        for inv in n.invoices:
+            inv.total_humanized = to_spanish_number_str(inv.total)
+            inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)
+            inv.unpaid_humanized = to_spanish_number_str(inv.total - inv.paid_total)
+            inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
+            inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
+        n.created_at_humanized = n.created_at.strftime('%d/%m/%Y %H:%M:%S')
+        n.updated_at_humanized = n.updated_at.strftime('%d/%m/%Y %H:%M:%S')
+    return notifications
 
 
 @app.route('/set-notification-status', methods=["POST"])
@@ -247,26 +278,6 @@ def verify_signature(payload_body, secret_token, signature_header):
         return False
     log.info('Got valid signature in verify_signature')
     return True
-
-
-def humanize_notifications(notifications):
-    for n in notifications:
-        n.status_humanized = status_to_human.get(n.status)
-        n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
-        n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
-        n.invoice_unpaid_total_humanized = to_spanish_number_str(n.invoice_total - n.invoice_paid_total)
-        n.client_info.phone_valid = check_if_phone_is_valid(n.client_info.phone)
-        n.client_info.phone_humanized = humanize_phone_number(n.client_info.phone) if n.client_info.phone_valid else n.client_info.phone
-        n.client_info.account_debt_humanized = to_spanish_number_str(int(n.client_info.account_debt)) if n.client_info.account_debt else '?'
-        for inv in n.invoices:
-            inv.total_humanized = to_spanish_number_str(inv.total)
-            inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)
-            inv.unpaid_humanized = to_spanish_number_str(inv.total - inv.paid_total)
-            inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
-            inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
-        n.created_at_humanized = n.created_at.strftime('%d/%m/%Y %H:%M:%S')
-        n.updated_at_humanized = n.updated_at.strftime('%d/%m/%Y %H:%M:%S')
-    return notifications
 
 
 def to_spanish_number_str(number):
