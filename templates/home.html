@@ -18,44 +18,15 @@
 
     <div>
         <!-- Bootstrap select with a apply button -->
-        <label for="expireInSelect">Obtener comprobantes que vencen:</label>
+        <label for="expireInSelect">Obtener comprobantes que vencen el:</label>
         <div class="row">
             <div class="col-2">
                 <div class="form-group mb-3">
                     <form id="expirationForm">
                         <select class="form-select" id="expireInSelect">
-                            <!-- Options for number of days -->
-                            <option value="0" {% if expire_in == 0 %} selected {%endif%}>Hoy</option>
-                            <option value="1" {% if expire_in == 1 %} selected {%endif%}>Mañana</option>
-                            <option value="2" {% if expire_in == 2 %} selected {%endif%}>Pasado mañana</option>
-                            <option value="3" {% if expire_in == 3 %} selected {%endif%}>En 3 días</option>
-                            <option value="4" {% if expire_in == 4 %} selected {%endif%}>En 4 días</option>
-                            <option value="5" {% if expire_in == 5 %} selected {%endif%}>En 5 días</option>
-                            <option value="6" {% if expire_in == 6 %} selected {%endif%}>En 6 días</option>
-                            <option value="7" {% if expire_in == 7 %} selected {%endif%}>En 7 días</option>
-                            <option value="8" {% if expire_in == 8 %} selected {%endif%}>En 8 días</option>
-                            <option value="9" {% if expire_in == 9 %} selected {%endif%}>En 9 días</option>
-                            <option value="10" {% if expire_in == 10 %} selected {%endif%}>En 10 días</option>
-                            <option value="11" {% if expire_in == 11 %} selected {%endif%}>En 11 días</option>
-                            <option value="12" {% if expire_in == 12 %} selected {%endif%}>En 12 días</option>
-                            <option value="13" {% if expire_in == 13 %} selected {%endif%}>En 13 días</option>
-                            <option value="14" {% if expire_in == 14 %} selected {%endif%}>En 14 días</option>
-                            <option value="15" {% if expire_in == 15 %} selected {%endif%}>En 15 días</option>
-                            <option value="16" {% if expire_in == 16 %} selected {%endif%}>En 16 días</option>
-                            <option value="17" {% if expire_in == 17 %} selected {%endif%}>En 17 días</option>
-                            <option value="18" {% if expire_in == 18 %} selected {%endif%}>En 18 días</option>
-                            <option value="19" {% if expire_in == 19 %} selected {%endif%}>En 19 días</option>
-                            <option value="20" {% if expire_in == 20 %} selected {%endif%}>En 20 días</option>
-                            <option value="21" {% if expire_in == 21 %} selected {%endif%}>En 21 días</option>
-                            <option value="22" {% if expire_in == 22 %} selected {%endif%}>En 22 días</option>
-                            <option value="23" {% if expire_in == 23 %} selected {%endif%}>En 23 días</option>
-                            <option value="24" {% if expire_in == 24 %} selected {%endif%}>En 24 días</option>
-                            <option value="25" {% if expire_in == 25 %} selected {%endif%}>En 25 días</option>
-                            <option value="26" {% if expire_in == 26 %} selected {%endif%}>En 26 días</option>
-                            <option value="27" {% if expire_in == 27 %} selected {%endif%}>En 27 días</option>
-                            <option value="28" {% if expire_in == 28 %} selected {%endif%}>En 28 días</option>
-                            <option value="29" {% if expire_in == 29 %} selected {%endif%}>En 29 días</option>
-                            <option value="30" {% if expire_in == 30 %} selected {%endif%}>En 30 días</option>
+                            {% for expire_in_value in expire_in_dates %}
+                                <option value="{{ expire_in_value['expire_in'] }}" {% if expire_in_value['selected'] %} selected {% endif %}>{{ expire_in_value['date'] }} ({{ expire_in_value['expire_in_str'] }})</option>
+                            {% endfor %}
                         </select>
                     </form>
                 </div>
@@ -93,7 +64,8 @@
                             <th>Número de comprobante</th>
                             <th>Total</th>
                             <th>Pagado</th>
-                            <th>Estado</th>
+                            <th>Ejecutivo de cuenta</th>
+                            <th>Estado de notificación</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -109,6 +81,11 @@
                                 <td>{{ invoice.invoice_number }} ({{ invoice.account_type }})</td>
                                 <td>$ {{ invoice.total_humanized }}</td>
                                 <td>$ {{ invoice.paid_total_humanized }}</td>
+                                <td>{{ notification.account_executive.user_name }}<br>
+                                    {% if notification.account_executive.phone_valid %}<a href="https://wa.me/{{ notification.client_info.phone }}" target="_blank"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i></a>
+                                    {% else %}<i class="fa-solid fa-triangle-exclamation text-warning"></i>
+                                    {% endif %}{{ notification.account_executive.phone_humanized }}
+                                </td>
 
                                 <td>
                                     <i id="{{ notification.id }}-status-pending-approval" class="fa-regular fa-clock text-gray-400" {% if notification.status != 'STATUS_PENDING_APPROVAL' %}style="display:none"{% endif %}></i>

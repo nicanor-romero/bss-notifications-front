@@ -10,6 +10,11 @@ import cryptography.fernet as fernet
 import notifications as m_notifications
 
 
+USER_ROLE_ADMIN = 'admin'
+USER_ROLE_ACCOUNT_EXECUTIVE = 'account_executive'
+USER_ROLE_USER = 'user'
+
+
 class DatabaseManager:
     def __init__(self, db_config, db_secrets):
         if db_secrets.get('fernet_key') is None:
@@ -47,13 +52,27 @@ class DatabaseManager:
             log.debug('Passwords are not equal')
             return
 
-        log.debug('\n```\nName: {}\nEmail: {}\nPassword: {}\n```'.format(name, email, password))
+        flexxus_user_id = None
+        if input('Is admin? (y/N): ').lower() == 'y':
+            role = USER_ROLE_ADMIN
+        elif input('Is account executive? (y/N): ').lower() == 'y':
+            role = USER_ROLE_ACCOUNT_EXECUTIVE
+            flexxus_user_id = input('Flexxus user ID: ')
+        else:
+            role = USER_ROLE_USER
+
+        log.debug('\n```\nName: {}\nEmail: {}\nPassword: {}\nRole: {}\nFlexxus User ID: {}\n```'.format(name, email, password, role, flexxus_user_id))
 
         if input('Create user? (y/N): ').lower() != 'y':
             log.debug('User not created')
             return
         hashed_password = self.fernet.encrypt(password.encode('ascii'))
-        user = {'_id': email, 'name': name, 'password': hashed_password}
+        user = {'_id': email,
+                'name': name,
+                'password': hashed_password,
+                'role': role,
+                'flexxus_user_id': flexxus_user_id
+        }
         try:
             result = self.db.users.replace_one({'_id': email}, user, upsert=True)
         except Exception as e:
@@ -79,22 +98,31 @@ class DatabaseManager:
         if password != stored_password:
             return {'ok': False, 'reason': "wrong_password"}
 
-        return {'ok': True, 'email': user.get('_id'), 'name': user.get('name')}
+        result = {
+            'ok': True,
+            'email': user.get('_id'),
+            'name': user.get('name'),
+            'role': user.get('role'),
+            'flexxus_user_id': user.get('flexxus_user_id')
+        }
+        return result
 
-    def get_db_invoice_expiration_notifications(self, from_date, to_date):
+    def get_db_invoice_expiration_notifications(self, from_date, to_date, flexxus_user_id):
+        db_query = {
+            '$and': [
+                {'from_date': {'$eq': from_date}},
+                {'to_date': {'$eq': to_date}},
+            ]
+        }
+        if flexxus_user_id:
+            db_query['$and'].append({'account_executive.user_id': {'$eq': flexxus_user_id}})
+
         try:
-            notifications = self.db.invoice_expiration_notifications.find(
-                {
-                    '$and': [
-                        {'from_date': {'$eq': from_date}},
-                        {'to_date': {'$eq': to_date}},
-                    ]
-                },
-            )
-
+            notifications = self.db.invoice_expiration_notifications.find(db_query)
         except Exception as e:
             log.error('Got error when trying to get invoice_expiration_notifications from {} to {} from database: {}'.format(from_date, to_date, e))
             return
+
         return [m_notifications.InvoiceExpirationNotification.from_db(n) for n in notifications] if notifications else []
 
     # get_db_invoice_expiration_client_notifications can receive a client_id, a client_name or both
@@ -220,7 +248,7 @@ if __name__ == '__main__':
         'fernet_key': os.environ.get('DB_SECRETS_KEY')
     }
     db_manager = DatabaseManager(config.get('db'), db_secrets)
-    # db_manager.add_user()
+    db_manager.add_user()
 
     # db_manager.set_whatsapp_app_secret(config.get('whatsapp').get('app_id'), '<app_secret_here>')
     # app = db_manager.get_whatsapp_app_secret(config.get('whatsapp').get('app_id'))

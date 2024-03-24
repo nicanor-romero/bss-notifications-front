@@ -37,6 +37,7 @@ status_to_human = {
     STATUS_EXPIRED: 'Expirada',
 }
 
+
 # check_if_logged_in returns True/False and a render_template call in case the user is not logged in
 def check_if_logged_in(func):
     @wraps(func)
@@ -58,20 +59,26 @@ def home():
     if flask.request.args and flask.request.args.get('expire_in'):
         expire_in_days = flask.request.args.get('expire_in')
         expire_in = datetime.timedelta(days=int(expire_in_days))
+    expire_in_dates = generate_expire_in_dates(31)
+    expire_in_dates[expire_in.days]['selected'] = True
 
     invoice_expiration_day = datetime.datetime.combine(datetime.datetime.today() + expire_in, datetime.datetime.min.time())
 
     # Get invoices created 30 days before the desired expiration day
     from_date = invoice_expiration_day - datetime.timedelta(days=30)
     to_date = from_date
-
     log.info('Getting invoice expiration notifications from {} to {}'.format(from_date, to_date))
 
-    notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date)
+    flexxus_user_id = None
+    if flask.session.get('user_role') == m_db_manager.USER_ROLE_ACCOUNT_EXECUTIVE:
+        flexxus_user_id = flask.session.get('user_flexxus_user_id')
+        log.info('Getting invoice expiration notifications for account executive {} only'.format(flexxus_user_id))
+
+    notifications = db_manager.get_db_invoice_expiration_notifications(from_date, to_date, flexxus_user_id)
     notifications = humanize_notifications(notifications)
     # Sort notifications by client name
     notifications = sorted(notifications, key=lambda n: n.client_info.name)
-    return flask.render_template('home.html', notifications=notifications, expire_in=expire_in.days, **global_variables())
+    return flask.render_template('home.html', notifications=notifications, expire_in_dates=expire_in_dates, **global_variables())
 
 
 def humanize_notifications(notifications):
@@ -80,18 +87,41 @@ def humanize_notifications(notifications):
         n.invoice_total_humanized = to_spanish_number_str(n.invoice_total)
         n.invoice_paid_total_humanized = to_spanish_number_str(n.invoice_paid_total)
         n.invoice_unpaid_total_humanized = to_spanish_number_str(n.invoice_total - n.invoice_paid_total)
+
         n.client_info.phone_valid = check_if_phone_is_valid(n.client_info.phone)
         n.client_info.phone_humanized = humanize_phone_number(n.client_info.phone) if n.client_info.phone_valid else n.client_info.phone
         n.client_info.account_debt_humanized = to_spanish_number_str(int(n.client_info.account_debt)) if n.client_info.account_debt else '?'
+
+        n.account_executive.user_name = n.account_executive.user_name.title()
+        n.account_executive.phone_valid = check_if_phone_is_valid(n.account_executive.phone)
+        n.account_executive.phone_humanized = humanize_phone_number(n.account_executive.phone) if n.account_executive.phone_valid else n.account_executive.phone
+
         for inv in n.invoices:
             inv.total_humanized = to_spanish_number_str(inv.total)
             inv.paid_total_humanized = to_spanish_number_str(inv.paid_total)
             inv.unpaid_humanized = to_spanish_number_str(inv.total - inv.paid_total)
             inv.invoice_datetime_humanized = inv.invoice_datetime.strftime('%d/%m/%Y')
             inv.invoice_expiration_datetime_humanized = inv.invoice_expiration_datetime.strftime('%d/%m/%Y')
+
         n.created_at_humanized = n.created_at.strftime('%d/%m/%Y %H:%M:%S')
         n.updated_at_humanized = n.updated_at.strftime('%d/%m/%Y %H:%M:%S')
     return notifications
+
+
+def generate_expire_in_dates(days=30):
+    today = datetime.datetime.today()
+    expire_in_values = []
+    for i in range(days):
+        expire_date = today + datetime.timedelta(days=i)
+        expire_in_str = 'En {} días'.format(i) if i > 1 else ['Hoy', 'Mañana'][i]
+        # [Date, Humanized, Selected]
+        expire_in_values.append({
+            "expire_in": i,
+            "date": expire_date.strftime("%d/%m/%Y"),
+            "expire_in_str": expire_in_str,
+            "selected": False}
+        )
+    return expire_in_values
 
 
 @app.route('/set-notification-status', methods=["POST"])
@@ -293,6 +323,9 @@ def check_if_phone_is_valid(phone):
     # compuesto por el código de área (indicador interurbano) y el número de abonado, sin considerar el prefijo telefónico internacional.
     # https://www.argentina.gob.ar/pais/codigo-telefonia
 
+    if len(phone) == 0:
+        return False
+
     # Remove leading zero
     if phone[0] == '0':
         phone = phone[1:]
@@ -346,6 +379,8 @@ def check_login():
 
     flask.session['username'] = login_status.get('email')
     flask.session['user_name'] = login_status.get('name')
+    flask.session['user_role'] = login_status.get('role')
+    flask.session['user_flexxus_user_id'] = login_status.get('flexxus_user_id')
     return {'ok': True}
 
 

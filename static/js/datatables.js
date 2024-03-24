@@ -25,7 +25,7 @@ $(document).ready(function() {
         pageLength: 50,
         ordering: false,
         order: [[0, 'asc'], [4, 'asc']],
-        rowsGroup: [0, 1, 2, 3, 7, 8],
+        rowsGroup: [0, 1, 2, 3, 8, 9],
         columnDefs: [
             // Código Particular
             {targets: 0, searchable: true, width: '1%', className: 'dt-right'},
@@ -41,10 +41,12 @@ $(document).ready(function() {
             {targets: 5, searchable: false, width: '8%', className: 'dt-right'},
             // Monto pagado de factura
             {targets: 6, searchable: false, width: '8%', className: 'dt-right'},
+            // Ejecutivo de cuenta
+            {targets: 7, searchable: true, width: '10%', className: 'dt-left'},
             // Estado
-            {targets: 7, searchable: false, width: '10%', className: 'dt-left'},
+            {targets: 8, searchable: false, width: '10%', className: 'dt-left'},
             // Acciones
-            {targets: 8, searchable: false, width: '8%', className: 'dt-right'},
+            {targets: 9, searchable: false, width: '8%', className: 'dt-right'},
         ],
         language: language_es
     }
